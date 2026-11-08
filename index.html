@@ -1,966 +1,1860 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" class="dark scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeFlow | Visual Development Platform</title>
+    <title>CodeFlow // 赛博电音级全息开发平台 (HYPER-VISUAL RAVE OS)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Orbitron, Space Grotesk, JetBrains Mono, Noto Sans SC -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Noto+Sans+SC:wght@400;500;700;900&family=Orbitron:wght@600;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Orbitron', 'Noto Sans SC', 'sans-serif'],
+                        sans: ['Space Grotesk', 'Noto Sans SC', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        rave: {
+                            bg: '#04010a',
+                            card: '#0b0418',
+                            pink: '#ff007f',
+                            cyan: '#00f5ff',
+                            lime: '#ccff00',
+                            purple: '#8a2be2',
+                            orange: '#ff5500'
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 8s linear infinite',
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'marquee': 'marquee 22s linear infinite',
+                        'float': 'float 5s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-50%)' }
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
+        :root {
+            --neon-pink: #ff007f;
+            --neon-cyan: #00f5ff;
+            --neon-lime: #ccff00;
+            --neon-purple: #8a2be2;
+            --neon-orange: #ff5500;
+            --mouse-x: 50vw;
+            --mouse-y: 50vh;
+            --beat-speed: 0.468s; /* 128 BPM */
+        }
+
         * {
-            margin: 0;
-            padding: 0;
             box-sizing: border-box;
+            selection-background-color: #ff007f;
+            selection-color: #ffffff;
         }
-        
+
+        ::selection {
+            background: #ff007f;
+            color: #00f5ff;
+        }
+
         body {
-            font-family: 'Roboto', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f9fbfd;
+            background-color: #04010a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            position: relative;
         }
-        
-        h1, h2, h3, h4 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            line-height: 1.3;
+
+        /* Custom Neon Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        
-        .container {
+        ::-webkit-scrollbar-track {
+            background: #05010d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ff007f, #00f5ff, #ccff00);
+            border-radius: 9999px;
+        }
+
+        /* Rave Overdrive Global Mode */
+        body.rave-overdrive {
+            --beat-speed: 0.28s;
+            animation: clubBassPulse 0.428s infinite alternate;
+        }
+
+        @keyframes clubBassPulse {
+            0% { filter: hue-rotate(0deg) contrast(102%); }
+            100% { filter: hue-rotate(18deg) contrast(112%) saturate(130%); }
+        }
+
+        /* 3D Perspective Synthwave Floor Grid */
+        .cyber-grid-floor {
+            position: absolute;
+            bottom: 0;
+            left: -50%;
+            width: 200%;
+            height: 420px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 245, 255, 0.22) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 0, 127, 0.25) 1px, transparent 1px);
+            background-size: 55px 55px;
+            transform: perspective(450px) rotateX(68deg);
+            transform-origin: center bottom;
+            animation: gridMove 3s linear infinite;
+            mask-image: linear-gradient(to top, rgba(0,0,0,0.95) 10%, transparent 95%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.95) 10%, transparent 95%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        body.rave-overdrive .cyber-grid-floor {
+            animation-duration: 0.8s;
+            background-image: 
+                linear-gradient(to right, rgba(204, 255, 0, 0.4) 2px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 0, 127, 0.45) 2px, transparent 1px);
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 55px; }
+        }
+
+        /* Flowing RGB Text Gradient */
+        .rgb-text {
+            background: linear-gradient(90deg, #ff007f, #00f5ff, #ccff00, #ff007f);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: rgbShift 5s linear infinite;
+        }
+
+        body.rave-overdrive .rgb-text {
+            animation-duration: 1.5s;
+        }
+
+        @keyframes rgbShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        /* Glitch Effect on Hover / Active */
+        .glitch-title {
+            position: relative;
+            text-shadow: 0 0 20px rgba(255, 0, 127, 0.5), 0 0 40px rgba(0, 245, 255, 0.3);
+        }
+        .glitch-title::before,
+        .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.75;
         }
-        
-        /* Header & Navigation */
-        header {
-            background-color: #fff;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-            position: fixed;
-            width: 100%;
-            z-index: 1000;
+        .glitch-title::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff007f;
+            clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+            animation: glitchSlice1 3.5s infinite linear alternate-reverse;
         }
-        
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
+        .glitch-title::after {
+            left: -2px;
+            text-shadow: -2px 0 #00f5ff;
+            clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+            animation: glitchSlice2 2.8s infinite linear alternate-reverse;
         }
-        
-        .logo {
-            display: flex;
-            align-items: center;
+
+        @keyframes glitchSlice1 {
+            0%, 85% { transform: translate(0); }
+            88% { transform: translate(-4px, 2px); }
+            92% { transform: translate(4px, -2px); }
+            96% { transform: translate(-2px, 0); }
+            100% { transform: translate(0); }
         }
-        
-        .logo-icon {
-            color: #4361ee;
-            font-size: 28px;
-            margin-right: 10px;
+        @keyframes glitchSlice2 {
+            0%, 80% { transform: translate(0); }
+            84% { transform: translate(4px, -2px); }
+            90% { transform: translate(-4px, 2px); }
+            95% { transform: translate(2px, 1px); }
+            100% { transform: translate(0); }
         }
-        
-        .logo-text {
-            font-family: 'Poppins', sans-serif;
-            font-size: 24px;
-            font-weight: 700;
-            color: #333;
+
+        /* Holographic Conic Border Card */
+        .holo-card {
+            position: relative;
+            background: rgba(11, 4, 24, 0.78);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
         }
-        
-        .logo-text span {
-            color: #4361ee;
+
+        .holo-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(
+                500px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, 50%),
+                rgba(0, 245, 255, 0.16),
+                rgba(255, 0, 127, 0.08) 40%,
+                transparent 80%
+            );
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 0;
         }
-        
-        .nav-links {
-            display: flex;
-            list-style: none;
+
+        .holo-card:hover::before {
+            opacity: 1;
         }
-        
-        .nav-links li {
-            margin-left: 30px;
+
+        .holo-card:hover {
+            border-color: rgba(0, 245, 255, 0.55);
+            box-shadow: 0 20px 50px -10px rgba(255, 0, 127, 0.3), 0 0 30px rgba(0, 245, 255, 0.25);
+            transform: translateY(-6px);
         }
-        
-        .nav-links a {
-            text-decoration: none;
-            color: #555;
-            font-weight: 500;
-            transition: color 0.3s;
+
+        /* Animated Spinning RGB Border for Featured Pricing & Hero Deck */
+        .rgb-border-box {
+            position: relative;
+            z-index: 1;
         }
-        
-        .nav-links a:hover {
-            color: #4361ee;
+        .rgb-border-box::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            padding: 2px;
+            background: linear-gradient(135deg, #ff007f, #00f5ff, #ccff00, #8a2be2, #ff007f);
+            background-size: 300% 300%;
+            animation: borderDance 4s ease infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
         }
-        
-        .cta-button {
-            background-color: #4361ee;
-            color: white;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
+
+        @keyframes borderDance {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        
-        .cta-button:hover {
-            background-color: #3a56d4;
+
+        /* Neon Buttons */
+        .btn-rave-primary {
+            position: relative;
+            background: linear-gradient(90deg, #ff007f 0%, #8a2be2 50%, #00f5ff 100%);
+            background-size: 200% auto;
+            color: #fff;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.6), 0 0 50px rgba(0, 245, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-rave-primary:hover {
+            background-position: right center;
+            box-shadow: 0 0 35px rgba(0, 245, 255, 0.85), 0 0 65px rgba(255, 0, 127, 0.75);
+            transform: translateY(-2px) scale(1.02);
+        }
+        .btn-rave-primary:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        .btn-rave-cyber {
+            background: rgba(0, 245, 255, 0.08);
+            border: 1.5px solid #00f5ff;
+            color: #00f5ff;
+            box-shadow: inset 0 0 15px rgba(0, 245, 255, 0.2), 0 0 20px rgba(0, 245, 255, 0.2);
+            transition: all 0.25s ease;
+        }
+        .btn-rave-cyber:hover {
+            background: #00f5ff;
+            color: #04010a;
+            box-shadow: 0 0 35px #00f5ff, 0 0 60px rgba(0, 245, 255, 0.6);
             transform: translateY(-2px);
         }
-        
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #333;
-            cursor: pointer;
-        }
-        
-        /* Hero Section */
-        .hero {
-            padding: 150px 0 100px;
-            background: linear-gradient(135deg, #f0f4ff 0%, #f9fbfd 100%);
-        }
-        
-        .hero-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .hero-text {
-            flex: 1;
-            padding-right: 40px;
-        }
-        
-        .hero-text h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #222;
-        }
-        
-        .hero-text h1 span {
-            color: #4361ee;
-        }
-        
-        .hero-text p {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 30px;
-            max-width: 600px;
-        }
-        
-        .hero-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .secondary-button {
-            background-color: white;
-            color: #4361ee;
-            border: 2px solid #4361ee;
-            padding: 12px 28px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .secondary-button:hover {
-            background-color: #f0f4ff;
-        }
-        
-        .hero-image {
-            flex: 1;
-            text-align: center;
-        }
-        
-        .hero-image img {
-            max-width: 100%;
-            border-radius: 10px;
-            box-shadow: 0 20px 40px rgba(67, 97, 238, 0.15);
-        }
-        
-        /* Features Section */
-        .section-title {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-        
-        .section-title h2 {
-            font-size: 36px;
-            color: #222;
-            margin-bottom: 15px;
-        }
-        
-        .section-title p {
-            color: #666;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-        
-        .features {
-            padding: 100px 0;
-            background-color: white;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 40px;
-        }
-        
-        .feature-card {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .feature-icon {
-            background-color: #eef2ff;
-            color: #4361ee;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
-        
-        .feature-card h3 {
-            font-size: 22px;
-            margin-bottom: 15px;
-        }
-        
-        .feature-card p {
-            color: #666;
-        }
-        
-        /* Benefits Section */
-        .benefits {
-            padding: 100px 0;
-            background-color: #f0f4ff;
-        }
-        
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
-        }
-        
-        .benefit-item {
-            text-align: center;
-            padding: 30px 20px;
-        }
-        
-        .benefit-icon {
-            color: #4361ee;
-            font-size: 40px;
-            margin-bottom: 20px;
-        }
-        
-        .benefit-item h3 {
-            font-size: 22px;
-            margin-bottom: 15px;
-        }
-        
-        .benefit-item p {
-            color: #666;
-        }
-        
-        /* Testimonials */
-        .testimonials {
-            padding: 100px 0;
-            background-color: white;
-        }
-        
-        .testimonial-slider {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-        }
-        
-        .testimonial {
-            background: #f9fbfd;
-            padding: 40px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .testimonial-text {
-            font-size: 18px;
-            font-style: italic;
-            margin-bottom: 30px;
-            color: #555;
-        }
-        
-        .testimonial-author {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .author-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #ddd;
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #4361ee;
-            font-size: 24px;
-        }
-        
-        .author-info h4 {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-        
-        .author-info p {
-            color: #777;
-            font-size: 14px;
-        }
-        
-        /* Pricing Section */
-        .pricing {
-            padding: 100px 0;
-            background-color: #f9fbfd;
-        }
-        
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-        }
-        
-        .pricing-card {
-            background: white;
-            border-radius: 10px;
-            padding: 40px 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .pricing-card.featured {
-            border-top: 5px solid #4361ee;
-            transform: scale(1.05);
-            position: relative;
-        }
-        
-        .featured-badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #4361ee;
-            color: white;
-            padding: 5px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        
-        .pricing-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .pricing-card.featured:hover {
-            transform: scale(1.05) translateY(-10px);
-        }
-        
-        .plan-name {
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .plan-price {
-            font-size: 48px;
-            font-weight: 700;
-            color: #4361ee;
-            margin-bottom: 20px;
-        }
-        
-        .plan-price span {
-            font-size: 16px;
-            color: #777;
-        }
-        
-        .plan-features {
-            list-style: none;
-            margin-bottom: 30px;
-        }
-        
-        .plan-features li {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-            color: #555;
-        }
-        
-        .plan-features li:last-child {
-            border-bottom: none;
-        }
-        
-        /* CTA Section */
-        .cta-section {
-            padding: 100px 0;
-            background: linear-gradient(135deg, #4361ee 0%, #3a56d4 100%);
-            text-align: center;
-            color: white;
-        }
-        
-        .cta-section h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-        
-        .cta-section p {
-            font-size: 18px;
-            max-width: 700px;
-            margin: 0 auto 30px;
-            opacity: 0.9;
-        }
-        
-        .cta-section .cta-button {
-            background-color: white;
-            color: #4361ee;
-            font-size: 16px;
-            padding: 15px 40px;
-        }
-        
-        .cta-section .cta-button:hover {
-            background-color: #f0f4ff;
-        }
-        
-        /* Footer */
-        footer {
-            background-color: #222;
-            color: #ccc;
-            padding: 70px 0 20px;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
-            margin-bottom: 50px;
-        }
-        
-        .footer-column h3 {
-            font-size: 20px;
-            color: white;
-            margin-bottom: 25px;
-        }
-        
-        .footer-links {
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-bottom: 12px;
-        }
-        
-        .footer-links a {
-            color: #aaa;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .footer-links a:hover {
-            color: #4361ee;
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #444;
-            font-size: 14px;
-            color: #888;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .hero-content {
-                flex-direction: column;
-            }
-            
-            .hero-text {
-                padding-right: 0;
-                margin-bottom: 50px;
-                text-align: center;
-            }
-            
-            .hero-text p {
-                margin: 0 auto 30px;
-            }
-            
-            .pricing-card.featured {
-                transform: none;
-            }
-            
-            .pricing-card.featured:hover {
-                transform: translateY(-10px);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-            
-            .mobile-menu-btn {
-                display: block;
-            }
-            
-            .hero-text h1 {
-                font-size: 36px;
-            }
-            
-            .section-title h2 {
-                font-size: 30px;
-            }
-            
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .hero-buttons button {
-                width: 100%;
-                max-width: 300px;
-            }
-        }
-        
-        @media (max-width: 576px) {
-            .hero {
-                padding: 130px 0 80px;
-            }
-            
-            .features, .benefits, .testimonials, .pricing, .cta-section {
-                padding: 70px 0;
-            }
-            
-            .feature-card, .testimonial {
-                padding: 25px;
-            }
-            
-            .plan-price {
-                font-size: 36px;
-            }
+
+        /* SVG Laser Flow Lines */
+        .laser-cable {
+            stroke-dasharray: 10 8;
+            animation: cableFlow 0.8s linear infinite;
+        }
+        body.rave-overdrive .laser-cable {
+            animation-duration: 0.22s;
+        }
+        @keyframes cableFlow {
+            to { stroke-dashoffset: -36; }
+        }
+
+        /* Equalizer Bars */
+        .eq-bar {
+            transform-origin: bottom;
+            animation: eqBounce var(--beat-speed, 0.45s) ease-in-out infinite alternate;
+        }
+        @keyframes eqBounce {
+            0% { transform: scaleY(0.18); }
+            100% { transform: scaleY(1); }
+        }
+
+        /* Scanline Overlay */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 0, 0, 0.22) 50%,
+                rgba(0, 0, 0, 0.22)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        /* Synth Pad Active State */
+        .synth-pad-btn {
+            transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .synth-pad-btn.pad-active {
+            transform: scale(0.93) translateY(2px);
+            filter: brightness(1.5);
         }
     </style>
 </head>
-<body>
-    <!-- Header & Navigation -->
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo">
-                    <div class="logo-icon"><i class="fas fa-bezier-curve"></i></div>
-                    <div class="logo-text">Code<span>Flow</span></div>
-                </div>
+<body class="antialiased selection:bg-rave-pink selection:text-white">
+
+    <!-- 1. FULL-SCREEN RAVE LASER & PARTICLE CANVAS -->
+    <canvas id="raveCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-85"></canvas>
+
+    <!-- Subtle Cyber Scanline Overlay -->
+    <div class="fixed inset-0 scanlines z-10 pointer-events-none opacity-30"></div>
+
+    <!-- Ambient Glowing Mouse Follower Orb -->
+    <div id="cursorGlow" class="fixed w-96 h-96 rounded-full pointer-events-none z-0 opacity-35 blur-3xl transition-transform duration-75"
+         style="background: radial-gradient(circle, rgba(255,0,127,0.45) 0%, rgba(0,245,255,0.3) 50%, transparent 70%); transform: translate(-50%, -50%); left: 50vw; top: 50vh;">
+    </div>
+
+    <!-- 2. TOP HUD NAVIGATION BAR -->
+    <header class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-10 pt-4">
+        <div class="max-w-7xl mx-auto">
+            <nav class="rgb-border-box rounded-2xl bg-[#070212]/85 backdrop-blur-xl px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-[0_10px_40px_rgba(0,0,0,0.8)]">
                 
-                <ul class="nav-links">
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#benefits">Benefits</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
-                    <li><a href="#pricing">Pricing</a></li>
-                    <li><a href="#">Resources</a></li>
+                <!-- Brand Logo + Live Equalizer -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-rave-pink via-rave-purple to-rave-cyan p-[2px] shadow-[0_0_20px_rgba(255,0,127,0.6)] group-hover:scale-110 transition-transform">
+                        <div class="w-full h-full bg-[#060112] rounded-[10px] flex items-center justify-center gap-0.5 px-2">
+                            <span class="w-1 h-5 bg-rave-pink rounded-full eq-bar" style="animation-delay: 0s;"></span>
+                            <span class="w-1 h-7 bg-rave-cyan rounded-full eq-bar" style="animation-delay: 0.15s;"></span>
+                            <span class="w-1 h-6 bg-rave-lime rounded-full eq-bar" style="animation-delay: 0.3s;"></span>
+                            <span class="w-1 h-4 bg-rave-orange rounded-full eq-bar" style="animation-delay: 0.08s;"></span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="font-display font-black text-xl sm:text-2xl tracking-wider flex items-center gap-1.5">
+                            <span class="text-white">CODE</span><span class="rgb-text">FLOW</span>
+                            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rave-pink/20 border border-rave-pink text-rave-pink hidden sm:inline-block">PRO V4.2</span>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-400 tracking-widest uppercase flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-rave-lime animate-ping"></span>
+                            <span id="navBpmDisplay">128 BPM // 视觉打碟引擎</span>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <ul class="hidden lg:flex items-center gap-7 text-sm font-medium text-slate-300">
+                    <li><a href="#deck" class="hover:text-rave-cyan transition-colors flex items-center gap-1.5"><i class="fas fa-sliders text-rave-pink text-xs"></i> 混音工作台</a></li>
+                    <li><a href="#features" class="hover:text-rave-cyan transition-colors flex items-center gap-1.5"><i class="fas fa-bolt text-rave-cyan text-xs"></i> 全息黑科技</a></li>
+                    <li><a href="#synthpad" class="hover:text-rave-lime transition-colors flex items-center gap-1.5"><i class="fas fa-drum text-rave-lime text-xs"></i> 赛博打击垫</a></li>
+                    <li><a href="#testimonials" class="hover:text-rave-pink transition-colors flex items-center gap-1.5"><i class="fas fa-id-badge text-rave-purple text-xs"></i> VIP 后台证</a></li>
+                    <li><a href="#pricing" class="hover:text-rave-cyan transition-colors flex items-center gap-1.5"><i class="fas fa-fire text-rave-orange text-xs"></i> 舞台票价</a></li>
                 </ul>
-                
-                <button class="cta-button">Start Free Trial</button>
-                <button class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+
+                <!-- Right Controls: Rave Overdrive Toggle + Audio + CTA -->
+                <div class="flex items-center gap-2.5 sm:gap-3">
+                    <!-- RAVE OVERDRIVE MODE BUTTON -->
+                    <button id="raveModeBtn" onclick="toggleRaveOverdrive()" 
+                            class="relative overflow-hidden px-3.5 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold border border-rave-lime/70 bg-rave-lime/10 text-rave-lime hover:bg-rave-lime hover:text-black transition-all shadow-[0_0_20px_rgba(204,255,0,0.3)] flex items-center gap-2 cursor-pointer">
+                        <i class="fas fa-bolt animate-bounce"></i>
+                        <span id="raveModeText">🔥 开启蹦迪模式</span>
+                    </button>
+
+                    <!-- Audio Mute/Unmute Pill -->
+                    <button id="audioToggleBtn" onclick="toggleSoundEngine()" title="切换电音合成器音效"
+                            class="w-9 h-9 rounded-xl border border-white/15 bg-white/5 hover:border-rave-cyan hover:text-rave-cyan text-slate-300 flex items-center justify-center transition-all cursor-pointer">
+                        <i id="audioIcon" class="fas fa-volume-up text-xs"></i>
+                    </button>
+
+                    <!-- Start Free Trial CTA -->
+                    <button onclick="openRaveModal('免费登台通行证 // FREE RAVE PASS', '立即解锁全息节点混音器、无限云端音浪部署与 AI 自动打碟生成代码。')" 
+                            class="hidden sm:flex btn-rave-primary px-4 py-2.5 rounded-xl text-xs sm:text-sm items-center gap-2 cursor-pointer">
+                        <span>立即上台</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+
+                    <!-- Mobile Menu Toggle -->
+                    <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="lg:hidden w-10 h-10 rounded-xl border border-white/15 bg-white/5 text-white flex items-center justify-center">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
             </nav>
+
+            <!-- Mobile Dropdown Menu -->
+            <div id="mobileMenu" class="hidden lg:hidden mt-2 rounded-2xl bg-[#090318]/95 backdrop-blur-2xl border border-rave-cyan/40 p-5 shadow-2xl">
+                <div class="flex flex-col gap-3 text-sm font-bold">
+                    <a href="#deck" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white/10 text-rave-cyan flex items-center gap-2"><i class="fas fa-sliders"></i> 混音工作台 (Live Node Deck)</a>
+                    <a href="#features" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white/10 text-rave-pink flex items-center gap-2"><i class="fas fa-bolt"></i> 全息黑科技 (Holo Features)</a>
+                    <a href="#synthpad" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white/10 text-rave-lime flex items-center gap-2"><i class="fas fa-drum"></i> 赛博打击垫 (Synth Pad)</a>
+                    <a href="#testimonials" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white/10 text-purple-400 flex items-center gap-2"><i class="fas fa-id-badge"></i> VIP 后台证 (Backstage)</a>
+                    <a href="#pricing" onclick="toggleMobileMenu()" class="py-2 px-3 rounded-lg hover:bg-white/10 text-rave-orange flex items-center gap-2"><i class="fas fa-fire"></i> 舞台票价 (Stage Pricing)</a>
+                    <button onclick="toggleMobileMenu(); openRaveModal('免费登台通行证 // FREE RAVE PASS', '立即开启你的 14 天百大 DJ 级开发体验！')" class="btn-rave-primary py-3 rounded-xl text-center mt-2">
+                        ⚡ 免费开启电音开发
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1>Build Apps Faster With <span>Visual Development</span></h1>
-                    <p>CodeFlow empowers teams to create enterprise-grade applications with minimal coding. Drag, drop, and connect components to build powerful web and mobile apps in record time.</p>
-                    <div class="hero-buttons">
-                        <button class="cta-button">Start Building Free</button>
-                        <button class="secondary-button">Watch Demo</button>
-                    </div>
-                </div>
-                <div class="hero-image">
-                    <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="CodeFlow Platform Interface">
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- 3. HERO SECTION WITH INTERACTIVE VISUAL NODE-BUILDER DECK -->
+    <section id="deck" class="relative min-h-screen pt-32 pb-24 flex items-center overflow-hidden z-20">
+        <!-- 3D Moving Laser Perspective Floor -->
+        <div class="cyber-grid-floor"></div>
 
-    <!-- Features Section -->
-    <section class="features" id="features">
-        <div class="container">
-            <div class="section-title">
-                <h2>Powerful Features for Rapid Development</h2>
-                <p>CodeFlow provides all the tools you need to build, deploy, and scale applications without writing extensive code.</p>
-            </div>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-th-large"></i>
-                    </div>
-                    <h3>Visual Builder</h3>
-                    <p>Drag and drop UI components to design responsive interfaces. Connect data sources with simple point-and-click actions.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-database"></i>
-                    </div>
-                    <h3>Database Integration</h3>
-                    <p>Connect to any data source with built-in connectors. Automatically generate CRUD operations without writing SQL.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h3>Cross-Platform</h3>
-                    <p>Build once, deploy everywhere. Generate applications for web, iOS, and Android from a single visual design.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-code"></i>
-                    </div>
-                    <h3>Extensible with Code</h3>
-                    <p>Add custom functionality with JavaScript when needed. Our platform doesn't limit your creativity or complexity.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h3>Enterprise Security</h3>
-                    <p>Built-in authentication, authorization, and data encryption. SOC2 compliant with enterprise-grade security features.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-rocket"></i>
-                    </div>
-                    <h3>One-Click Deployment</h3>
-                    <p>Deploy to cloud or on-premises with a single click. Automatic scaling and monitoring included.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+        <!-- Glowing Background Spotlights -->
+        <div class="absolute top-20 left-10 w-96 h-96 bg-rave-pink/25 rounded-full blur-[130px] pointer-events-none"></div>
+        <div class="absolute top-32 right-10 w-96 h-96 bg-rave-cyan/25 rounded-full blur-[130px] pointer-events-none"></div>
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 w-[600px] h-64 bg-rave-lime/15 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <!-- Benefits Section -->
-    <section class="benefits" id="benefits">
-        <div class="container">
-            <div class="section-title">
-                <h2>Why Choose CodeFlow?</h2>
-                <p>Join thousands of companies accelerating their digital transformation with low-code development.</p>
-            </div>
-            
-            <div class="benefits-grid">
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3>10x Faster Development</h3>
-                    <p>Build applications in days instead of months with visual development tools.</p>
-                </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-money-bill-wave"></i>
+                <!-- Left Hero Copy (5 Cols) -->
+                <div class="lg:col-span-5 text-center lg:text-left">
+                    <!-- Neon Pill Badge -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/5 border border-rave-cyan/50 shadow-[0_0_20px_rgba(0,245,255,0.25)] mb-6">
+                        <span class="flex h-2.5 w-2.5 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rave-pink opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rave-pink"></span>
+                        </span>
+                        <span class="font-mono text-xs font-bold tracking-wider uppercase text-rave-cyan">
+                            NEXT-GEN VISUAL RAVE ENGINE // 2026
+                        </span>
                     </div>
-                    <h3>Reduce Costs by 70%</h3>
-                    <p>Lower development and maintenance costs with fewer resources required.</p>
-                </div>
-                
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Citizen Developers</h3>
-                    <p>Enable business users to build solutions with minimal IT assistance.</p>
-                </div>
-                
-                <div class="benefit-item">
-                    <div class="benefit-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Scale Effortlessly</h3>
-                    <p>From prototype to enterprise-scale applications with the same platform.</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Testimonials -->
-    <section class="testimonials" id="testimonials">
-        <div class="container">
-            <div class="section-title">
-                <h2>Trusted by Industry Leaders</h2>
-                <p>See what our customers have to say about their experience with CodeFlow.</p>
-            </div>
-            
-            <div class="testimonial-slider">
-                <div class="testimonial">
-                    <div class="testimonial-text">
-                        "CodeFlow transformed how we deliver solutions to our business units. What used to take 6 months now takes 3 weeks. Our development team can focus on complex problems while business teams build their own solutions."
+                    <!-- Epic Glitch Title -->
+                    <h1 class="font-display font-black text-4xl sm:text-5xl xl:text-6xl leading-[1.12] tracking-tight mb-6">
+                        <span class="block text-white glitch-title" data-text="像百大 DJ 打碟一样">像百大 DJ 打碟一样</span>
+                        <span class="rgb-text block mt-2">极速构建炸场应用</span>
+                    </h1>
+
+                    <p class="text-slate-300 text-base sm:text-lg leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
+                        告别枯燥死板的传统低代码！<strong class="text-rave-cyan font-semibold">CodeFlow</strong> 将企业级全栈研发变成一场肾上腺素飙升的电音派对。拖拽全息组件、串联激光数据流，10 倍速一键 Drop 部署全球云端。
+                    </p>
+
+                    <!-- Hero CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-9">
+                        <button onclick="triggerHeroDrop()" class="w-full sm:w-auto btn-rave-primary px-7 py-4 rounded-2xl text-base flex items-center justify-center gap-3 cursor-pointer group">
+                            <i class="fas fa-bolt text-rave-lime group-hover:rotate-12 transition-transform"></i>
+                            <span>一键 DROP 部署演示</span>
+                        </button>
+                        <button onclick="openRaveModal('全景电音工作台预览 // LIVE DEMO', '欢迎进入 CodeFlow 虚拟打碟台！你可以直接在右侧拖拽或点击全息节点，调节 BPM 推子体验实时代码混音。')" 
+                                class="w-full sm:w-auto btn-rave-cyber px-7 py-4 rounded-2xl text-base font-bold flex items-center justify-center gap-2.5 cursor-pointer">
+                            <i class="fas fa-play-circle"></i>
+                            <span>免费开启狂欢试用</span>
+                        </button>
                     </div>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">SC</div>
-                        <div class="author-info">
-                            <h4>Sarah Chen</h4>
-                            <p>CTO, TechGrowth Inc.</p>
+
+                    <!-- Mini Live Telemetry Bar -->
+                    <div class="grid grid-cols-3 gap-3 pt-4 border-t border-white/10 text-left">
+                        <div class="bg-white/[0.03] border border-white/10 rounded-xl p-3">
+                            <div class="text-xs font-mono text-slate-400">构建提速</div>
+                            <div class="font-display font-black text-xl text-rave-lime">10.8x <span class="text-xs font-normal text-slate-400">MAX</span></div>
+                        </div>
+                        <div class="bg-white/[0.03] border border-white/10 rounded-xl p-3">
+                            <div class="text-xs font-mono text-slate-400">节点延迟</div>
+                            <div class="font-display font-black text-xl text-rave-cyan">0.4ms <span class="text-xs font-normal text-slate-400">SYNC</span></div>
+                        </div>
+                        <div class="bg-white/[0.03] border border-white/10 rounded-xl p-3">
+                            <div class="text-xs font-mono text-slate-400">在线主理人</div>
+                            <div class="font-display font-black text-xl text-rave-pink">42.9K+</div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Pricing Section -->
-    <section class="pricing" id="pricing">
-        <div class="container">
-            <div class="section-title">
-                <h2>Simple, Transparent Pricing</h2>
-                <p>Choose the plan that fits your needs. All plans include core features with no hidden fees.</p>
-            </div>
-            
-            <div class="pricing-grid">
-                <div class="pricing-card">
-                    <h3 class="plan-name">Starter</h3>
-                    <div class="plan-price">$29<span>/month</span></div>
-                    <ul class="plan-features">
-                        <li>Up to 5 users</li>
-                        <li>10 GB storage</li>
-                        <li>Basic components</li>
-                        <li>Community support</li>
-                        <li>1 production app</li>
-                    </ul>
-                    <button class="secondary-button">Get Started</button>
-                </div>
-                
-                <div class="pricing-card featured">
-                    <div class="featured-badge">Most Popular</div>
-                    <h3 class="plan-name">Professional</h3>
-                    <div class="plan-price">$89<span>/month</span></div>
-                    <ul class="plan-features">
-                        <li>Up to 25 users</li>
-                        <li>100 GB storage</li>
-                        <li>All components</li>
-                        <li>Priority support</li>
-                        <li>10 production apps</li>
-                        <li>Custom branding</li>
-                    </ul>
-                    <button class="cta-button">Try Free for 14 Days</button>
-                </div>
-                
-                <div class="pricing-card">
-                    <h3 class="plan-name">Enterprise</h3>
-                    <div class="plan-price">Custom</div>
-                    <ul class="plan-features">
-                        <li>Unlimited users</li>
-                        <li>Unlimited storage</li>
-                        <li>All features included</li>
-                        <li>24/7 dedicated support</li>
-                        <li>Unlimited apps</li>
-                        <li>On-premises option</li>
-                    </ul>
-                    <button class="secondary-button">Contact Sales</button>
-                </div>
-            </div>
-        </div>
-    </section>
+                <!-- Right Interactive Visual Node-Builder DJ Deck (7 Cols) -->
+                <div class="lg:col-span-7">
+                    <div class="rgb-border-box rounded-3xl bg-[#080214]/90 backdrop-blur-2xl p-4 sm:p-6 shadow-[0_0_70px_rgba(255,0,127,0.25)] relative">
+                        
+                        <!-- Deck Top Bar (DJ Mixer Header) -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-white/10">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-3 h-3 rounded-full bg-rave-pink shadow-[0_0_10px_#ff007f]"></span>
+                                <span class="w-3 h-3 rounded-full bg-rave-lime shadow-[0_0_10px_#ccff00]"></span>
+                                <span class="w-3 h-3 rounded-full bg-rave-cyan shadow-[0_0_10px_#00f5ff]"></span>
+                                <span class="font-mono text-xs sm:text-sm font-bold text-white ml-2">
+                                    DECK_01 // 全息可视化节点编排器.flow
+                                </span>
+                            </div>
 
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <h2>Start Building Today</h2>
-            <p>Join over 10,000 companies that use CodeFlow to accelerate their application development. No credit card required for the free trial.</p>
-            <button class="cta-button">Get Started for Free</button>
-        </div>
-    </section>
+                            <!-- Interactive BPM Slider inside the Deck -->
+                            <div class="flex items-center gap-3 bg-black/50 border border-white/15 px-3 py-1.5 rounded-xl">
+                                <span class="font-mono text-xs text-rave-cyan font-bold">BPM 推子:</span>
+                                <input id="bpmSlider" type="range" min="80" max="180" value="128" 
+                                       oninput="updateBpm(this.value)"
+                                       class="w-24 accent-rave-pink cursor-pointer h-1.5 bg-slate-700 rounded-lg">
+                                <span id="deckBpmValue" class="font-mono text-xs font-extrabold text-rave-lime w-14 text-right">128 BPM</span>
+                            </div>
+                        </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <div class="logo">
-                        <div class="logo-icon"><i class="fas fa-bezier-curve"></i></div>
-                        <div class="logo-text">Code<span>Flow</span></div>
+                        <!-- Interactive Node Canvas Area -->
+                        <div id="nodeStage" class="relative h-[340px] sm:h-[370px] rounded-2xl bg-[#04010a] border border-white/10 overflow-hidden p-4 select-none">
+                            <!-- Background Subtle Dot Matrix -->
+                            <div class="absolute inset-0 opacity-25" style="background-image: radial-gradient(#00f5ff 1px, transparent 1px); background-size: 20px 20px;"></div>
+
+                            <!-- SVG Laser Connections Between Nodes -->
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 600 360" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="gradPinkCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#ff007f" />
+                                        <stop offset="100%" stop-color="#00f5ff" />
+                                    </linearGradient>
+                                    <linearGradient id="gradCyanLime" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#00f5ff" />
+                                        <stop offset="100%" stop-color="#ccff00" />
+                                    </linearGradient>
+                                    <linearGradient id="gradPinkLime" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#ff007f" />
+                                        <stop offset="100%" stop-color="#ccff00" />
+                                    </linearGradient>
+                                </defs>
+                                <!-- Glow Under-lines -->
+                                <path d="M 140 90 C 260 90, 220 180, 320 180" stroke="url(#gradPinkCyan)" stroke-width="6" fill="none" opacity="0.25" />
+                                <path d="M 140 265 C 260 265, 220 180, 320 180" stroke="url(#gradCyanLime)" stroke-width="6" fill="none" opacity="0.25" />
+                                <path d="M 380 180 C 450 180, 450 180, 510 180" stroke="url(#gradPinkLime)" stroke-width="7" fill="none" opacity="0.3" />
+
+                                <!-- Animated Laser Cables -->
+                                <path id="cable1" d="M 140 90 C 260 90, 220 180, 320 180" stroke="url(#gradPinkCyan)" stroke-width="3" fill="none" class="laser-cable" />
+                                <path id="cable2" d="M 140 265 C 260 265, 220 180, 320 180" stroke="url(#gradCyanLime)" stroke-width="3" fill="none" class="laser-cable" />
+                                <path id="cable3" d="M 380 180 C 450 180, 450 180, 510 180" stroke="url(#gradPinkLime)" stroke-width="3.5" fill="none" class="laser-cable" />
+                            </svg>
+
+                            <!-- NODE 1: Visual UI Synth (Top Left) -->
+                            <div onclick="pulseNode(1, 'UI 全息视觉组件已注入！', 523.25)" 
+                                 id="nodeCard1"
+                                 class="absolute top-5 left-4 sm:left-6 w-44 sm:w-48 rounded-xl bg-[#0e0521]/95 border-2 border-rave-pink p-3 shadow-[0_0_25px_rgba(255,0,127,0.4)] cursor-pointer hover:scale-105 transition-all z-10">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rave-pink/20 text-rave-pink">INPUT // 01</span>
+                                    <i class="fas fa-wand-magic-sparkles text-rave-pink text-sm"></i>
+                                </div>
+                                <div class="font-bold text-sm text-white">全息 UI 合成器</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">React / Tailwind 律动</div>
+                                <div class="mt-2 h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                                    <div class="h-full bg-rave-pink w-4/5 animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            <!-- NODE 2: Hyper Neon Database (Bottom Left) -->
+                            <div onclick="pulseNode(2, '霓虹数据库 CRUD 已自动同步！', 659.25)" 
+                                 id="nodeCard2"
+                                 class="absolute bottom-5 left-4 sm:left-6 w-44 sm:w-48 rounded-xl bg-[#0e0521]/95 border-2 border-rave-cyan p-3 shadow-[0_0_25px_rgba(0,245,255,0.4)] cursor-pointer hover:scale-105 transition-all z-10">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rave-cyan/20 text-rave-cyan">DATA // 02</span>
+                                    <i class="fas fa-database text-rave-cyan text-sm"></i>
+                                </div>
+                                <div class="font-bold text-sm text-white">超频云数据库</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5">Postgres + 毫秒级流同步</div>
+                                <div class="mt-2 flex items-center gap-1 text-[10px] font-mono text-rave-cyan">
+                                    <span class="w-2 h-2 rounded-full bg-rave-cyan animate-ping"></span> 14,200 QPS 狂飙中
+                                </div>
+                            </div>
+
+                            <!-- NODE 3: AI Neural Logic Core (Center) -->
+                            <div onclick="pulseNode(3, 'AI 混音引擎已完成业务逻辑编排！', 783.99)" 
+                                 id="nodeCard3"
+                                 class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 sm:w-52 rounded-2xl bg-[#14072e]/95 border-2 border-rave-lime p-3.5 shadow-[0_0_35px_rgba(204,255,0,0.45)] cursor-pointer hover:scale-105 transition-all z-20">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rave-lime/20 text-rave-lime">CORE // AI MIXER</span>
+                                    <i class="fas fa-microchip text-rave-lime animate-spin-slow"></i>
+                                </div>
+                                <div class="font-bold text-sm sm:text-base text-white">AI 智能打碟中枢</div>
+                                <div class="text-[11px] text-slate-300 mt-0.5">点击节点触发声光编译</div>
+                                <!-- Mini Equalizer inside Core Node -->
+                                <div class="mt-2.5 flex items-end gap-1 h-5 pt-1">
+                                    <div class="flex-1 bg-rave-pink h-full eq-bar rounded-sm" style="animation-delay:0.1s"></div>
+                                    <div class="flex-1 bg-rave-cyan h-4/5 eq-bar rounded-sm" style="animation-delay:0.25s"></div>
+                                    <div class="flex-1 bg-rave-lime h-full eq-bar rounded-sm" style="animation-delay:0.05s"></div>
+                                    <div class="flex-1 bg-rave-orange h-3/4 eq-bar rounded-sm" style="animation-delay:0.35s"></div>
+                                    <div class="flex-1 bg-rave-pink h-full eq-bar rounded-sm" style="animation-delay:0.18s"></div>
+                                    <div class="flex-1 bg-rave-cyan h-2/3 eq-bar rounded-sm" style="animation-delay:0.29s"></div>
+                                </div>
+                            </div>
+
+                            <!-- NODE 4: Global Edge Drop (Right) -->
+                            <div onclick="triggerHeroDrop()" 
+                                 id="nodeCard4"
+                                 class="absolute top-1/2 right-3 sm:right-5 -translate-y-1/2 w-36 sm:w-44 rounded-2xl bg-gradient-to-b from-rave-pink/25 to-rave-purple/25 border-2 border-white/80 p-3 text-center shadow-[0_0_30px_rgba(255,0,127,0.6)] cursor-pointer hover:scale-105 transition-all z-10">
+                                <div class="w-10 h-10 rounded-full bg-rave-pink mx-auto flex items-center justify-center mb-1.5 shadow-[0_0_20px_#ff007f]">
+                                    <i class="fas fa-rocket text-white text-sm"></i>
+                                </div>
+                                <div class="font-display font-black text-xs sm:text-sm text-white">LIVE EDGE</div>
+                                <div id="deployStatusBadge" class="text-[10px] font-mono text-rave-lime mt-1">● READY TO DROP</div>
+                            </div>
+
+                            <!-- Live Code / Console Overlay Ticker at Bottom of Canvas -->
+                            <div class="absolute bottom-2 right-3 left-3 sm:left-auto sm:w-72 bg-black/80 backdrop-blur-md border border-white/15 rounded-lg px-3 py-1.5 font-mono text-[11px] text-rave-cyan flex items-center gap-2 z-20">
+                                <span class="text-rave-pink font-bold">&gt;</span>
+                                <span id="liveDeckConsole" class="truncate">点击任意全息节点试听声光混音...</span>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Deck Controls: DJ Quick FX Buttons -->
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-2 pt-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="pulseNode(1, '⚡ 注入赛博暗黑主题皮肤！', 440)" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-rave-pink/20 border border-white/10 hover:border-rave-pink text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer">
+                                    🎨 切换霓虹皮肤
+                                </button>
+                                <button onclick="pulseNode(2, '🔥 自动生成 GraphQL + 鉴权网关！', 587.33)" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-rave-cyan/20 border border-white/10 hover:border-rave-cyan text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer">
+                                    🔐 挂载高防网关
+                                </button>
+                                <button onclick="pulseNode(3, '🚀 AI 自动修复 0 漏洞，性能拉满！', 880)" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-rave-lime/20 border border-white/10 hover:border-rave-lime text-xs font-mono text-slate-300 hover:text-white transition-all cursor-pointer">
+                                    🧠 AI 超频优化
+                                </button>
+                            </div>
+                            <button onclick="triggerHeroDrop()" class="px-4 py-1.5 rounded-lg bg-rave-lime text-black font-mono text-xs font-extrabold hover:brightness-110 shadow-[0_0_15px_rgba(204,255,0,0.6)] transition-all cursor-pointer">
+                                ⚡ DROP THE CODE (一键发版)
+                            </button>
+                        </div>
+
                     </div>
-                    <p style="margin-top: 20px; color: #aaa;">The leading visual development platform for building enterprise applications with minimal coding.</p>
                 </div>
-                
-                <div class="footer-column">
-                    <h3>Product</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Features</a></li>
-                        <li><a href="#">Pricing</a></li>
-                        <li><a href="#">Use Cases</a></li>
-                        <li><a href="#">Integrations</a></li>
-                        <li><a href="#">Roadmap</a></li>
-                    </ul>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. INFINITE NEON RAVE MARQUEE TAPE -->
+    <div class="relative z-20 py-4 bg-gradient-to-r from-rave-pink via-rave-purple to-rave-cyan border-y-2 border-white/30 shadow-[0_0_40px_rgba(255,0,127,0.4)] overflow-hidden -rotate-1 scale-[1.02]">
+        <div class="flex whitespace-nowrap animate-marquee font-display font-black text-sm sm:text-base tracking-widest uppercase text-white">
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-bolt text-rave-lime"></i> 10X 极速应用构建</span>
+            <span class="mx-6 text-rave-lime">///</span>
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-compact-disc animate-spin"></i> ZERO BOILERPLATE 零样板代码</span>
+            <span class="mx-6 text-rave-lime">///</span>
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-fire text-rave-lime"></i> 拖拽即生产级全栈代码</span>
+            <span class="mx-6 text-rave-lime">///</span>
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-shield-halved text-rave-cyan"></i> SOC2 赛博级加密装甲</span>
+            <span class="mx-6 text-rave-lime">///</span>
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-globe text-rave-lime"></i> 一键编译 WEB + iOS + ANDROID</span>
+            <span class="mx-6 text-rave-lime">///</span>
+            <!-- Duplicate for seamless loop -->
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-bolt text-rave-lime"></i> 10X 极速应用构建</span>
+            <span class="mx-6 text-rave-lime">///</span>
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-compact-disc animate-spin"></i> ZERO BOILERPLATE 零样板代码</span>
+            <span class="mx-6 text-rave-lime">///</span>
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-fire text-rave-lime"></i> 拖拽即生产级全栈代码</span>
+            <span class="mx-6 text-rave-lime">///</span>
+            <span class="mx-6 flex items-center gap-2"><i class="fas fa-shield-halved text-rave-cyan"></i> SOC2 赛博级加密装甲</span>
+        </div>
+    </div>
+
+    <!-- 5. HOLOGRAPHIC BENTO GRID FEATURES SECTION -->
+    <section id="features" class="relative py-28 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto mb-20">
+                <div class="inline-block font-mono text-xs font-bold uppercase tracking-widest px-3.5 py-1 rounded-full bg-rave-pink/15 border border-rave-pink text-rave-pink mb-4">
+                    HYPER-VISUAL ARCHITECTURE // 六大炸场核心引擎
                 </div>
+                <h2 class="font-display font-black text-3xl sm:text-5xl text-white tracking-tight mb-5">
+                    把无聊的敲代码变成 <span class="rgb-text">全息声光秀</span>
+                </h2>
+                <p class="text-slate-400 text-base sm:text-lg">
+                    CodeFlow 内置全套高能开发模块，移动鼠标感受流光全息反射，点击任意模块即可试听合成器反馈。
+                </p>
+            </div>
+
+            <!-- 6-Card Holographic Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7" id="bentoGrid">
                 
-                <div class="footer-column">
-                    <h3>Resources</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Documentation</a></li>
-                        <li><a href="#">Tutorials</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Community</a></li>
-                        <li><a href="#">Support</a></li>
-                    </ul>
+                <!-- Feature 1 -->
+                <div class="holo-card rounded-3xl p-7 group cursor-pointer" onclick="playSynthNote(523.25, 'sine')">
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl bg-rave-pink/15 border border-rave-pink/50 flex items-center justify-center text-2xl text-rave-pink shadow-[0_0_25px_rgba(255,0,127,0.4)] mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-display font-bold text-xl text-white group-hover:text-rave-pink transition-colors">全息拖拽画布</h3>
+                            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-rave-pink border border-rave-pink/30">60FPS 丝滑</span>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                            内置 200+ 赛博与现代高颜值 UI 组件。像拼乐高和调音台一样自由拖拽，自动适配桌面、平板与移动端响应式布局。
+                        </p>
+                        <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-rave-cyan">
+                            <span>● 像素级自由吸附</span>
+                            <span class="group-hover:translate-x-1 transition-transform">试听音效 &rarr;</span>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="footer-column">
-                    <h3>Company</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Contact</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                    </ul>
+
+                <!-- Feature 2 -->
+                <div class="holo-card rounded-3xl p-7 group cursor-pointer" onclick="playSynthNote(587.33, 'triangle')">
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl bg-rave-cyan/15 border border-rave-cyan/50 flex items-center justify-center text-2xl text-rave-cyan shadow-[0_0_25px_rgba(0,245,255,0.4)] mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-all">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-display font-bold text-xl text-white group-hover:text-rave-cyan transition-colors">超频数据库直连</h3>
+                            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-rave-cyan border border-rave-cyan/30">ZERO SQL</span>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                            一键连线 PostgreSQL、MySQL、MongoDB 与 REST/GraphQL 接口。无需手写繁琐 SQL，零延迟自动生成增删改查 API。
+                        </p>
+                        <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-rave-pink">
+                            <span>● 毫秒级实时订阅</span>
+                            <span class="group-hover:translate-x-1 transition-transform">试听音效 &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="holo-card rounded-3xl p-7 group cursor-pointer" onclick="playSynthNote(659.25, 'sawtooth')">
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl bg-rave-lime/15 border border-rave-lime/50 flex items-center justify-center text-2xl text-rave-lime shadow-[0_0_25px_rgba(204,255,0,0.4)] mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all">
+                            <i class="fas fa-mobile-screen-button"></i>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-display font-bold text-xl text-white group-hover:text-rave-lime transition-colors">一次编排 全端炸场</h3>
+                            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-rave-lime border border-rave-lime/30">WEB + APP</span>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                            同一套视觉蓝图，一键同步编译出原生级 iOS、Android、微信小程序与高性能 Web 应用，彻底告别多端重复造轮子。
+                        </p>
+                        <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-rave-lime">
+                            <span>● 原生 120Hz 渲染</span>
+                            <span class="group-hover:translate-x-1 transition-transform">试听音效 &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="holo-card rounded-3xl p-7 group cursor-pointer" onclick="playSynthNote(783.99, 'sine')">
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-500/15 border border-purple-400/50 flex items-center justify-center text-2xl text-purple-400 shadow-[0_0_25px_rgba(138,43,226,0.4)] mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-all">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-display font-bold text-xl text-white group-hover:text-purple-400 transition-colors">硬核代码自由 Remix</h3>
+                            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-purple-300 border border-purple-400/30">TS / PYTHON</span>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                            绝不限制程序员的创造力！随时切入 TypeScript、React 或 Python 编写自定义算法节点，还能一键导出纯净无锁源码。
+                        </p>
+                        <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-purple-300">
+                            <span>● 100% 源码可导出</span>
+                            <span class="group-hover:translate-x-1 transition-transform">试听音效 &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="holo-card rounded-3xl p-7 group cursor-pointer" onclick="playSynthNote(880, 'triangle')">
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl bg-rave-orange/15 border border-rave-orange/50 flex items-center justify-center text-2xl text-rave-orange shadow-[0_0_25px_rgba(255,85,0,0.4)] mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all">
+                            <i class="fas fa-shield-virus"></i>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-display font-bold text-xl text-white group-hover:text-rave-orange transition-colors">金融级赛博装甲</h3>
+                            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-rave-orange border border-rave-orange/30">SOC2 & ISO</span>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                            内置 RBAC 细粒度权限矩阵、SSO 单点登录、端到端量子级加密传输与自动防 DDoS 护盾，让企业核心资产稳如泰山。
+                        </p>
+                        <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-rave-orange">
+                            <span>● 支持私有化机房部署</span>
+                            <span class="group-hover:translate-x-1 transition-transform">试听音效 &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="holo-card rounded-3xl p-7 group cursor-pointer" onclick="playSynthNote(1046.5, 'sawtooth')">
+                    <div class="relative z-10">
+                        <div class="w-14 h-14 rounded-2xl bg-rave-pink/15 border border-rave-cyan/50 flex items-center justify-center text-2xl text-rave-cyan shadow-[0_0_25px_rgba(0,245,255,0.4)] mb-6 group-hover:scale-110 group-hover:-rotate-6 transition-all">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-display font-bold text-xl text-white group-hover:text-rave-cyan transition-colors">秒级全球音浪部署</h3>
+                            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-white/5 text-rave-cyan border border-rave-cyan/30">GLOBAL CDN</span>
+                        </div>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-5">
+                            按下 Drop 键，3 秒内自动完成容器构建并分发至全球 300+ 边缘计算节点，自带百万并发弹性扩容与实时声呐监控。
+                        </p>
+                        <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-rave-cyan">
+                            <span>● 零停机热更新回滚</span>
+                            <span class="group-hover:translate-x-1 transition-transform">试听音效 &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. HIGH-VOLTAGE METRICS & SPECTRUM ANALYZER SECTION (WHY CODEFLOW) -->
+    <section class="relative py-24 z-20 bg-[#070213]/90 border-y border-white/10 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="font-display font-black text-3xl sm:text-4xl text-white">
+                    为什么全球 <span class="rgb-text">10,000+ 极客团队</span> 正在狂欢？
+                </h2>
+                <p class="text-slate-400 mt-3">真实生产环境跑出的硬核战绩，把省下的时间拿去蹦迪与创新</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Stat Card 1 -->
+                <div class="holo-card rounded-3xl p-7 text-center relative overflow-hidden">
+                    <div class="font-display font-black text-5xl sm:text-6xl text-rave-pink drop-shadow-[0_0_20px_rgba(255,0,127,0.7)] mb-2">
+                        10x
+                    </div>
+                    <div class="font-bold text-lg text-white mb-1">研发交付狂飙提速</div>
+                    <p class="text-xs text-slate-400">原本半年开发周期缩短至 2 周上线</p>
+                    <div class="mt-5 flex items-end justify-center gap-1 h-8 opacity-60">
+                        <span class="w-2 bg-rave-pink h-full eq-bar rounded-t"></span>
+                        <span class="w-2 bg-rave-pink h-3/5 eq-bar rounded-t" style="animation-delay:0.1s"></span>
+                        <span class="w-2 bg-rave-pink h-4/5 eq-bar rounded-t" style="animation-delay:0.2s"></span>
+                        <span class="w-2 bg-rave-pink h-full eq-bar rounded-t" style="animation-delay:0.3s"></span>
+                        <span class="w-2 bg-rave-pink h-2/3 eq-bar rounded-t" style="animation-delay:0.15s"></span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="holo-card rounded-3xl p-7 text-center relative overflow-hidden">
+                    <div class="font-display font-black text-5xl sm:text-6xl text-rave-cyan drop-shadow-[0_0_20px_rgba(0,245,255,0.7)] mb-2">
+                        -70%
+                    </div>
+                    <div class="font-bold text-lg text-white mb-1">研发与运维成本直降</div>
+                    <p class="text-xs text-slate-400">全自动云原生弹性扩缩容，省钱省心</p>
+                    <div class="mt-5 flex items-end justify-center gap-1 h-8 opacity-60">
+                        <span class="w-2 bg-rave-cyan h-4/5 eq-bar rounded-t" style="animation-delay:0.2s"></span>
+                        <span class="w-2 bg-rave-cyan h-full eq-bar rounded-t" style="animation-delay:0.05s"></span>
+                        <span class="w-2 bg-rave-cyan h-3/5 eq-bar rounded-t" style="animation-delay:0.25s"></span>
+                        <span class="w-2 bg-rave-cyan h-full eq-bar rounded-t" style="animation-delay:0.12s"></span>
+                        <span class="w-2 bg-rave-cyan h-3/4 eq-bar rounded-t" style="animation-delay:0.3s"></span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="holo-card rounded-3xl p-7 text-center relative overflow-hidden">
+                    <div class="font-display font-black text-5xl sm:text-6xl text-rave-lime drop-shadow-[0_0_20px_rgba(204,255,0,0.7)] mb-2">
+                        99.99%
+                    </div>
+                    <div class="font-bold text-lg text-white mb-1">SLA 永不掉线音浪</div>
+                    <p class="text-xs text-slate-400">多活跨区容灾备份，扛住双十一级洪峰</p>
+                    <div class="mt-5 flex items-end justify-center gap-1 h-8 opacity-60">
+                        <span class="w-2 bg-rave-lime h-full eq-bar rounded-t" style="animation-delay:0.15s"></span>
+                        <span class="w-2 bg-rave-lime h-2/3 eq-bar rounded-t" style="animation-delay:0.3s"></span>
+                        <span class="w-2 bg-rave-lime h-full eq-bar rounded-t" style="animation-delay:0.08s"></span>
+                        <span class="w-2 bg-rave-lime h-4/5 eq-bar rounded-t" style="animation-delay:0.22s"></span>
+                        <span class="w-2 bg-rave-lime h-full eq-bar rounded-t" style="animation-delay:0.1s"></span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div class="holo-card rounded-3xl p-7 text-center relative overflow-hidden">
+                    <div class="font-display font-black text-5xl sm:text-6xl text-rave-orange drop-shadow-[0_0_20px_rgba(255,85,0,0.7)] mb-2">
+                        0门槛
+                    </div>
+                    <div class="font-bold text-lg text-white mb-1">全员皆可成为创造者</div>
+                    <p class="text-xs text-slate-400">产品经理与架构师同频协作，所见即所得</p>
+                    <div class="mt-5 flex items-end justify-center gap-1 h-8 opacity-60">
+                        <span class="w-2 bg-rave-orange h-3/4 eq-bar rounded-t" style="animation-delay:0.05s"></span>
+                        <span class="w-2 bg-rave-orange h-full eq-bar rounded-t" style="animation-delay:0.18s"></span>
+                        <span class="w-2 bg-rave-orange h-3/5 eq-bar rounded-t" style="animation-delay:0.28s"></span>
+                        <span class="w-2 bg-rave-orange h-full eq-bar rounded-t" style="animation-delay:0.14s"></span>
+                        <span class="w-2 bg-rave-orange h-4/5 eq-bar rounded-t" style="animation-delay:0.24s"></span>
+                    </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- 7. INTERACTIVE 8-KEY CYBER SYNTH PAD (PLAYABLE LAUNCHPAD) -->
+    <section id="synthpad" class="relative py-24 z-20">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="rgb-border-box rounded-3xl bg-[#090318]/90 backdrop-blur-2xl p-6 sm:p-10 shadow-[0_0_80px_rgba(0,245,255,0.2)]">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                    <div>
+                        <div class="inline-flex items-center gap-2 font-mono text-xs text-rave-lime mb-2">
+                            <i class="fas fa-gamepad"></i> INTERACTIVE RAVE LAUNCHPAD // 支持键盘按键 [1 - 8]
+                        </div>
+                        <h3 class="font-display font-black text-2xl sm:text-3xl text-white">
+                            亲手试弹：<span class="rgb-text">事件驱动全息打击垫</span>
+                        </h3>
+                        <p class="text-slate-400 text-sm mt-1">
+                            点击下方霓虹打击垫或按键盘数字键 <code class="text-rave-cyan font-mono">1-8</code>，感受每个业务触发器带来的实时电音合成与激光反馈！
+                        </p>
+                    </div>
+                    <button onclick="playAutoRaveRiff()" class="btn-rave-cyber px-5 py-3 rounded-xl font-mono text-xs font-bold shrink-0 cursor-pointer">
+                        🎵 自动演奏一段电音 Riff
+                    </button>
+                </div>
+
+                <!-- 8 Neon Launchpad Buttons -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <button id="pad-1" onclick="triggerSynthPad(1, 'AUTH_LOGIN // 极速鉴权通过', 261.63, 'sawtooth', '#ff007f')"
+                            class="synth-pad-btn h-28 rounded-2xl bg-gradient-to-br from-rave-pink/30 to-rave-pink/5 border-2 border-rave-pink shadow-[0_0_25px_rgba(255,0,127,0.35)] p-4 flex flex-col justify-between text-left cursor-pointer group">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-mono text-xs font-bold text-rave-pink">[KEY 1]</span>
+                            <i class="fas fa-fingerprint text-rave-pink group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-sm text-white">BASS KICK</div>
+                            <div class="text-[11px] font-mono text-slate-300">OAuth 极速登录</div>
+                        </div>
+                    </button>
+
+                    <button id="pad-2" onclick="triggerSynthPad(2, 'DB_QUERY // 0.3ms 索引命中', 329.63, 'triangle', '#00f5ff')"
+                            class="synth-pad-btn h-28 rounded-2xl bg-gradient-to-br from-rave-cyan/30 to-rave-cyan/5 border-2 border-rave-cyan shadow-[0_0_25px_rgba(0,245,255,0.35)] p-4 flex flex-col justify-between text-left cursor-pointer group">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-mono text-xs font-bold text-rave-cyan">[KEY 2]</span>
+                            <i class="fas fa-bolt text-rave-cyan group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-sm text-white">LASER SYNTH</div>
+                            <div class="text-[11px] font-mono text-slate-300">Redis 缓存命中</div>
+                        </div>
+                    </button>
+
+                    <button id="pad-3" onclick="triggerSynthPad(3, 'AI_AGENT // 神经网络推理完成', 392.00, 'sawtooth', '#ccff00')"
+                            class="synth-pad-btn h-28 rounded-2xl bg-gradient-to-br from-rave-lime/30 to-rave-lime/5 border-2 border-rave-lime shadow-[0_0_25px_rgba(204,255,0,0.35)] p-4 flex flex-col justify-between text-left cursor-pointer group">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-mono text-xs font-bold text-rave-lime">[KEY 3]</span>
+                            <i class="fas fa-brain text-rave-lime group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-sm text-white">ACID LEAD</div>
+                            <div class="text-[11px] font-mono text-slate-300">AI 大模型流式输出</div>
+                        </div>
+                    </button>
+
+                    <button id="pad-4" onclick="triggerSynthPad(4, 'STRIPE_PAY // 订单支付秒级到账', 523.25, 'sine', '#ff5500')"
+                            class="synth-pad-btn h-28 rounded-2xl bg-gradient-to-br from-rave-orange/30 to-rave-orange/5 border-2 border-rave-orange shadow-[0_0_25px_rgba(255,85,0,0.35)] p-4 flex flex-col justify-between text-left cursor-pointer group">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-mono text-xs font-bold text-rave-orange">[KEY 4]</span>
+                            <i class="fas fa-coins text-rave-orange group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-sm text-white">CYBER CHORD</div>
+                            <div class="text-[11px] font-mono text-slate-300">全球支付网关回调</div>
+                        </div>
+                    </button>
+
+                    <button id="pad-5" onclick="triggerSynthPad(5, 'WEBHOOK_SYNC // 跨平台消息广播', 587.33, 'triangle', '#a855f7')"
+                            class="synth-pad-btn h-28 rounded-2xl bg-gradient-to-br from-purple-500/30 to-purple-500/5 border-2 border-purple-400 shadow-[0_0_25px_rgba(168,85,247,0.35)] p-4 flex flex-col justify-between text-left cursor-pointer group">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-mono text-xs font-bold text-purple-300">[KEY 5]</span>
+                            <i class="fas fa-satellite-dish text-purple-300 group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-sm text-white">HYPER ARP</div>
+                            <div class="text-[11px] font-mono text-slate-300">WebSocket 实时推送</div>
+                        </div>
+                    </button>
+
+                    <button id="pad-6" onclick="triggerSynthPad(6, 'AUTO_SCALE // 集群扩容至 128 节点', 659.25, 'sawtooth', '#00f5ff')"
+                            class="synth-pad-btn h-28 rounded-2xl bg-gradient-to-br from-rave-cyan/30 to-rave-pink/10 border-2 border-rave-cyan shadow-[0_0_25px_rgba(0,245,255,0.35)] p-4 flex flex-col justify-between text-left cursor-pointer group">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-mono text-xs font-bold text-rave-cyan">[KEY 6]</span>
+                            <i class="fas fa-server text-rave-cyan group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-sm text-white">SUB DROP</div>
+                            <div class="text-[11px] font-mono text-slate-300">K8s 弹性算力拉满</div>
+                        </div>
+                    </button>
+
+                    <button id="pad-7" onclick="triggerSynthPad(7, 'WAF_SHIELD // 拦截 99,400 次恶意探测', 783.99, 'square', '#ff007f')"
+                            class="synth-pad-btn h-28 rounded-2xl bg-gradient-to-br from-rave-pink/30 to-purple-500/10 border-2 border-rave-pink shadow-[0_0_25px_rgba(255,0,127,0.35)] p-4 flex flex-col justify-between text-left cursor-pointer group">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-mono text-xs font-bold text-rave-pink">[KEY 7]</span>
+                            <i class="fas fa-user-astronaut text-rave-pink group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-sm text-white">NEON SNARE</div>
+                            <div class="text-[11px] font-mono text-slate-300">零信任防火墙开启</div>
+                        </div>
+                    </button>
+
+                    <button id="pad-8" onclick="triggerSynthPad(8, 'PROD_DEPLOY // 全球 300 节点同步高潮！', 1046.50, 'sawtooth', '#ccff00')"
+                            class="synth-pad-btn h-28 rounded-2xl bg-gradient-to-br from-rave-lime/30 to-rave-cyan/10 border-2 border-rave-lime shadow-[0_0_25px_rgba(204,255,0,0.35)] p-4 flex flex-col justify-between text-left cursor-pointer group">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-mono text-xs font-bold text-rave-lime">[KEY 8]</span>
+                            <i class="fas fa-fire-flame-curved text-rave-lime group-hover:scale-125 transition-transform"></i>
+                        </div>
+                        <div>
+                            <div class="font-display font-bold text-sm text-white">RAVE CLIMAX</div>
+                            <div class="text-[11px] font-mono text-slate-300">一键全网正式发布</div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Live Synth Telemetry Output -->
+                <div class="mt-5 px-4 py-2.5 rounded-xl bg-black/70 border border-white/10 flex items-center justify-between font-mono text-xs">
+                    <span id="synthPadStatus" class="text-rave-lime">🎵 等待触发打击垫... (点击上方按钮或按键盘 1-8)</span>
+                    <span class="text-slate-500 hidden sm:inline">WEB AUDIO SYNTHESIZER // ACTIVE</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. VIP BACKSTAGE PASS TESTIMONIALS -->
+    <section id="testimonials" class="relative py-24 z-20">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <div class="inline-block font-mono text-xs font-bold uppercase tracking-widest px-3.5 py-1 rounded-full bg-rave-cyan/15 border border-rave-cyan text-rave-cyan mb-3">
+                    VIP BACKSTAGE PASSES // 行业领航者打 CALL
+                </div>
+                <h2 class="font-display font-black text-3xl sm:text-5xl text-white">
+                    听听主舞台 <span class="rgb-text">超级架构师</span> 怎么说
+                </h2>
+            </div>
+
+            <!-- Interactive Testimonial Stage -->
+            <div class="holo-card rounded-3xl p-8 sm:p-12 border-2 border-rave-cyan/40 relative">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Left VIP Pass Badge (4 Cols) -->
+                    <div class="lg:col-span-4 flex flex-col items-center text-center p-6 rounded-2xl bg-gradient-to-b from-white/10 to-white/[0.02] border border-white/15 relative">
+                        <div class="text-[10px] font-mono tracking-widest uppercase px-3 py-0.5 rounded-full bg-rave-pink text-white font-bold mb-4">
+                            ★ ALL-ACCESS VIP PASS ★
+                        </div>
+                        <div id="vipAvatar" class="w-20 h-20 rounded-2xl bg-gradient-to-br from-rave-pink to-rave-cyan flex items-center justify-center font-display font-black text-2xl text-black shadow-[0_0_30px_rgba(255,0,127,0.6)] mb-4">
+                            SC
+                        </div>
+                        <h4 id="vipName" class="font-display font-bold text-xl text-white">Sarah Chen 陈莎拉</h4>
+                        <p id="vipRole" class="text-xs font-mono text-rave-cyan mt-1">TechGrowth 集团首席技术官 CTO</p>
+                        <div class="mt-4 flex items-center gap-1 text-rave-lime text-sm">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                    </div>
+
+                    <!-- Right Quote & Waveform (8 Cols) -->
+                    <div class="lg:col-span-8 flex flex-col justify-between">
+                        <i class="fas fa-quote-left text-4xl text-rave-pink/40 mb-4"></i>
+                        <blockquote id="vipQuote" class="text-lg sm:text-2xl font-medium text-white leading-relaxed mb-8">
+                            “CodeFlow 彻底颠覆了我们向业务部门交付系统的方式！以前需要 6 个月憋大招的项目，现在 2 周就能带着炫酷的动效直接上线。研发团队终于能摆脱枯燥的增删改查，专注攻克核心算法！”
+                        </blockquote>
+
+                        <!-- Selector Tabs -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/10">
+                            <div class="flex items-center gap-2">
+                                <button onclick="selectVipTestimonial(0)" id="vipTab0" class="px-4 py-2 rounded-xl font-mono text-xs font-bold bg-rave-pink text-white shadow-[0_0_15px_#ff007f] transition-all cursor-pointer">
+                                    01 // Sarah CTO
+                                </button>
+                                <button onclick="selectVipTestimonial(1)" id="vipTab1" class="px-4 py-2 rounded-xl font-mono text-xs font-bold bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer">
+                                    02 // Marcus 运营总监
+                                </button>
+                                <button onclick="selectVipTestimonial(2)" id="vipTab2" class="px-4 py-2 rounded-xl font-mono text-xs font-bold bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer">
+                                    03 // 林哲 独立创始人
+                                </button>
+                            </div>
+                            <span class="font-mono text-xs text-rave-lime flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-rave-lime animate-ping"></span> VERIFIED RAVE USER
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. RAVE TIER PRICING SECTION (CHOOSE YOUR STAGE) -->
+    <section id="pricing" class="relative py-28 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="copyright">
-                <p>&copy; 2023 CodeFlow. All rights reserved.</p>
+            <!-- Pricing Header + Billing Toggle -->
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <div class="inline-block font-mono text-xs font-bold uppercase tracking-widest px-3.5 py-1 rounded-full bg-rave-lime/15 border border-rave-lime text-rave-lime mb-4">
+                    TRANSPARENT TICKETING // 选择你的主舞台票档
+                </div>
+                <h2 class="font-display font-black text-3xl sm:text-5xl text-white mb-6">
+                    火力全开，拒绝任何 <span class="rgb-text">隐形消费</span>
+                </h2>
+
+                <!-- Monthly / Yearly Switch -->
+                <div class="inline-flex items-center gap-4 bg-white/5 border border-white/15 p-2 rounded-2xl">
+                    <button id="billMonthlyBtn" onclick="setBillingCycle('monthly')" class="px-5 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold bg-rave-pink text-white shadow-[0_0_20px_rgba(255,0,127,0.5)] transition-all cursor-pointer">
+                        按月灵活狂欢
+                    </button>
+                    <button id="billYearlyBtn" onclick="setBillingCycle('yearly')" class="px-5 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer">
+                        <span>按年包场狂欢</span>
+                        <span class="px-2 py-0.5 rounded-full bg-rave-lime text-black text-[10px] font-extrabold">立省 30%</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3 Pricing Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+                
+                <!-- Tier 1: Warm-Up DJ -->
+                <div class="holo-card rounded-3xl p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-mono text-xs uppercase tracking-widest text-rave-cyan">STAGE 01 // STARTER</span>
+                            <i class="fas fa-headphones text-rave-cyan text-xl"></i>
+                        </div>
+                        <h3 class="font-display font-black text-2xl text-white mb-2">新秀打碟版 (Starter)</h3>
+                        <p class="text-slate-400 text-xs mb-6">适合独立开发者、黑客松战队与小型先锋团队快速验证创意。</p>
+                        
+                        <div class="mb-6 pb-6 border-b border-white/10">
+                            <span id="priceStarter" class="font-display font-black text-5xl text-white">$29</span>
+                            <span class="text-slate-400 font-mono text-sm"> / 月</span>
+                        </div>
+
+                        <ul class="space-y-3.5 text-sm text-slate-300 mb-8">
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-cyan"></i> 最多支持 5 位协作成员</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-cyan"></i> 20 GB 超高速霓虹云存储</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-cyan"></i> 全套基础全息 UI 组件库</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-cyan"></i> 3 个生产环境正式应用</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-cyan"></i> Discord 极客社区支持</li>
+                        </ul>
+                    </div>
+
+                    <button onclick="openRaveModal('已选择：新秀打碟版 (Starter)', '立享 14 天全功能免费试用，无需绑定信用卡，30 秒即可创建你的第一个全息应用！')" 
+                            class="w-full btn-rave-cyber py-4 rounded-2xl font-display font-bold text-sm uppercase tracking-wider cursor-pointer">
+                        开启新秀舞台
+                    </button>
+                </div>
+
+                <!-- Tier 2: Mainstage Headliner (FEATURED) -->
+                <div class="rgb-border-box rounded-3xl bg-[#100426]/95 p-8 flex flex-col justify-between transform lg:-translate-y-4 shadow-[0_0_60px_rgba(255,0,127,0.35)] relative">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1 rounded-full bg-gradient-to-r from-rave-pink via-rave-purple to-rave-cyan text-white font-mono text-xs font-extrabold uppercase tracking-wider shadow-[0_0_25px_#ff007f]">
+                        🔥 百大主舞台爆款 // MOST POPULAR
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-4 mt-2">
+                            <span class="font-mono text-xs uppercase tracking-widest text-rave-lime">STAGE 02 // PRO HEADLINER</span>
+                            <i class="fas fa-crown text-rave-lime text-xl animate-bounce"></i>
+                        </div>
+                        <h3 class="font-display font-black text-2xl text-white mb-2">百大主舞台版 (Pro)</h3>
+                        <p class="text-slate-300 text-xs mb-6">高速成长型科技企业的首选，解锁全部 AI 混音引擎与多端编译能力。</p>
+                        
+                        <div class="mb-6 pb-6 border-b border-white/15">
+                            <span id="pricePro" class="font-display font-black text-5xl rgb-text">$89</span>
+                            <span class="text-slate-300 font-mono text-sm"> / 月</span>
+                        </div>
+
+                        <ul class="space-y-3.5 text-sm text-white mb-8">
+                            <li class="flex items-center gap-3"><i class="fas fa-bolt text-rave-lime"></i> <strong>最多 25 位</strong> 核心主理人席位</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-bolt text-rave-lime"></i> <strong>200 GB</strong> NVMe 极速数据库存储</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-bolt text-rave-lime"></i> 解锁全部 200+ 商业级组件 & AI 节点</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-bolt text-rave-lime"></i> <strong>15 个</strong> 生产级 Web/iOS/Android 应用</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-bolt text-rave-lime"></i> 支持自定义品牌域名与去除水印</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-bolt text-rave-lime"></i> 7×24 小时专属 VIP 工程师护航</li>
+                        </ul>
+                    </div>
+
+                    <button onclick="openRaveModal('已锁定：百大主舞台版 (Pro Headliner)', '恭喜解锁最受欢迎的主舞台席位！系统已为你准备好 14 天全功能免费通行证 + 专属 AI 算力礼包。')" 
+                            class="w-full btn-rave-primary py-4 rounded-2xl font-display font-bold text-sm uppercase tracking-wider cursor-pointer">
+                        ⚡ 免费狂欢试用 14 天
+                    </button>
+                </div>
+
+                <!-- Tier 3: Festival God (Enterprise) -->
+                <div class="holo-card rounded-3xl p-8 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="font-mono text-xs uppercase tracking-widest text-rave-pink">STAGE 03 // ENTERPRISE</span>
+                            <i class="fas fa-shield-halved text-rave-pink text-xl"></i>
+                        </div>
+                        <h3 class="font-display font-black text-2xl text-white mb-2">史诗音乐节版 (Enterprise)</h3>
+                        <p class="text-slate-400 text-xs mb-6">专为大型集团与跨国机构定制，提供无限算力与私有化本地部署。</p>
+                        
+                        <div class="mb-6 pb-6 border-b border-white/10">
+                            <span class="font-display font-black text-4xl sm:text-5xl text-white">专属定制</span>
+                            <span class="text-slate-400 font-mono text-xs block mt-1">UNLIMITED SCALE</span>
+                        </div>
+
+                        <ul class="space-y-3.5 text-sm text-slate-300 mb-8">
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-pink"></i> <strong>无限量</strong> 团队席位与生产应用数</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-pink"></i> 支持 <strong>私有云 / 本地机房</strong> 独立部署</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-pink"></i> 定制化 SSO、LDAP 与金融级合规审计</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-pink"></i> 99.999% 金融级 SLA 赔付保障</li>
+                            <li class="flex items-center gap-3"><i class="fas fa-check text-rave-pink"></i> 驻场架构师 1 对 1 数字化转型陪跑</li>
+                        </ul>
+                    </div>
+
+                    <button onclick="openRaveModal('预约史诗音乐节企业版演示 // VIP SALES', '我们的首席架构师将在 15 分钟内与您取得联系，为您定制私有化部署方案与专属算力报价。')" 
+                            class="w-full btn-rave-cyber py-4 rounded-2xl font-display font-bold text-sm uppercase tracking-wider cursor-pointer">
+                        预约架构师专场演示
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 10. EPIC FINAL CTA SECTION -->
+    <section class="relative py-24 z-20 overflow-hidden">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="rgb-border-box rounded-3xl bg-gradient-to-r from-[#17042c] via-[#0b0322] to-[#041a29] p-10 sm:p-16 text-center shadow-[0_0_90px_rgba(255,0,127,0.3)] relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="font-mono text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full bg-white/10 text-rave-lime border border-rave-lime/40">
+                        READY TO DROP THE BASS? // 准备好炸场了吗
+                    </span>
+                    <h2 class="font-display font-black text-3xl sm:text-5xl text-white mt-6 mb-5">
+                        今晚就用 <span class="rgb-text">CodeFlow</span> 开启你的代码狂欢
+                    </h2>
+                    <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto mb-9">
+                        加入全球超过 10,000+ 先锋科技团队，无需信用卡即可免费开启 14 天全功能试用。让每一次需求迭代都像电音节高潮一样令人沸腾！
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button onclick="openRaveModal('⚡ 欢迎登台！全息工作台已就绪', '您的免费试用环境已成功初始化！输入工作邮箱即可立即进入 140 BPM 极速开发模式。')" 
+                                class="w-full sm:w-auto btn-rave-primary px-9 py-4 rounded-2xl text-base cursor-pointer">
+                            🚀 免费创建我的第一个应用
+                        </button>
+                        <button onclick="toggleRaveOverdrive()" 
+                                class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/5 hover:bg-white/15 border border-white/20 font-mono text-sm font-bold text-rave-lime transition-all cursor-pointer">
+                            🎧 切换全屏蹦迪模式
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 11. CYBER FOOTER -->
+    <footer class="relative z-20 bg-[#030108] border-t border-white/10 pt-16 pb-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+                
+                <!-- Col 1: Brand -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-rave-pink to-rave-cyan flex items-center justify-center text-black font-black">
+                            <i class="fas fa-bezier-curve"></i>
+                        </div>
+                        <span class="font-display font-black text-2xl text-white">CODE<span class="rgb-text">FLOW</span></span>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
+                        全球领先的次世代全息可视化开发平台。将赛博电音的极致律动与企业级全栈工程完美融合。
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <a href="#deck" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-rave-pink hover:text-white text-slate-400 flex items-center justify-center transition-all"><i class="fab fa-github"></i></a>
+                        <a href="#deck" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-rave-cyan hover:text-black text-slate-400 flex items-center justify-center transition-all"><i class="fab fa-discord"></i></a>
+                        <a href="#deck" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-rave-lime hover:text-black text-slate-400 flex items-center justify-center transition-all"><i class="fab fa-twitter"></i></a>
+                        <a href="#deck" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-rave-orange hover:text-white text-slate-400 flex items-center justify-center transition-all"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <!-- Col 2 -->
+                <div>
+                    <h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4 text-rave-cyan">核心引擎</h4>
+                    <ul class="space-y-2.5 text-sm text-slate-400">
+                        <li><a href="#deck" class="hover:text-rave-pink transition-colors">全息混音画布</a></li>
+                        <li><a href="#features" class="hover:text-rave-pink transition-colors">AI 节点自动编排</a></li>
+                        <li><a href="#features" class="hover:text-rave-pink transition-colors">毫秒级数据库同步</a></li>
+                        <li><a href="#synthpad" class="hover:text-rave-pink transition-colors">全球边缘音浪发布</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3 -->
+                <div>
+                    <h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4 text-rave-pink">开发者生态</h4>
+                    <ul class="space-y-2.5 text-sm text-slate-400">
+                        <li><a href="#synthpad" class="hover:text-rave-cyan transition-colors">极客电音文档库</a></li>
+                        <li><a href="#synthpad" class="hover:text-rave-cyan transition-colors">组件混音市场</a></li>
+                        <li><a href="#testimonials" class="hover:text-rave-cyan transition-colors">百大架构师社区</a></li>
+                        <li><a href="#pricing" class="hover:text-rave-cyan transition-colors">API 实时状态监控</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4 -->
+                <div>
+                    <h4 class="font-display font-bold text-white text-sm uppercase tracking-wider mb-4 text-rave-lime">关于舞台</h4>
+                    <ul class="space-y-2.5 text-sm text-slate-400">
+                        <li><a href="#testimonials" class="hover:text-rave-lime transition-colors">关于 CodeFlow</a></li>
+                        <li><a href="#pricing" class="hover:text-rave-lime transition-colors">加入我们 (招 DJ 程序员)</a></li>
+                        <li><a href="#pricing" class="hover:text-rave-lime transition-colors">隐私与安全白皮书</a></li>
+                        <li><a href="#pricing" class="hover:text-rave-lime transition-colors">联系商务主理人</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-slate-500 gap-4">
+                <div>&copy; 2026 CODEFLOW INC. ALL RIGHTS RESERVED // 保持 140 BPM 永远热泪盈眶</div>
+                <div class="flex items-center gap-2 text-rave-lime">
+                    <span class="w-2 h-2 rounded-full bg-rave-lime animate-ping"></span>
+                    ALL STAGE SYSTEMS OPERATIONAL
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- 12. FIXED BOTTOM 32-BAND RGB SPECTRUM ANALYZER HUD (VISIBLE IN RAVE OVERDRIVE) -->
+    <div id="bottomEqualizerHud" class="fixed bottom-0 left-0 right-0 h-12 z-40 pointer-events-none flex items-end justify-between px-2 gap-1 opacity-25 transition-opacity duration-500">
+        <!-- Dynamically populated by JS with 36 neon spectrum bars -->
+    </div>
+
+    <!-- 13. CUSTOM HOLOGRAPHIC MODAL (REPLACES ALL ALERTS) -->
+    <div id="raveModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
+        <div class="rgb-border-box max-w-md w-full rounded-3xl bg-[#0b031c] p-7 shadow-[0_0_80px_rgba(255,0,127,0.5)] relative animate-float">
+            <button onclick="closeRaveModal()" class="absolute top-4 right-4 w-9 h-9 rounded-xl bg-white/10 hover:bg-rave-pink text-white flex items-center justify-center cursor-pointer">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-rave-pink to-rave-cyan flex items-center justify-center text-2xl text-black font-black mb-5 shadow-[0_0_25px_#ff007f]">
+                <i class="fas fa-bolt"></i>
+            </div>
+
+            <h3 id="modalTitle" class="font-display font-black text-2xl text-white mb-2">
+                开启全息狂欢
+            </h3>
+            <p id="modalDesc" class="text-slate-300 text-sm leading-relaxed mb-6">
+                输入您的极客通行证邮箱，即刻获取百大主舞台开发权限。
+            </p>
+
+            <form onsubmit="submitRaveModal(event)" class="space-y-4">
+                <div>
+                    <label class="block font-mono text-xs text-rave-cyan mb-1.5">YOUR CYBER EMAIL // 极客邮箱</label>
+                    <input id="modalEmailInput" type="email" required placeholder="dj-coder@future-rave.io" 
+                           class="w-full px-4 py-3 rounded-xl bg-black/60 border border-rave-cyan/50 text-white text-sm focus:outline-none focus:border-rave-pink">
+                </div>
+                <button type="submit" class="w-full btn-rave-primary py-3.5 rounded-xl font-display font-bold text-sm cursor-pointer">
+                    ⚡ 立即激活 VIP 通行证
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Floating Toast Notification -->
+    <div id="raveToast" class="fixed bottom-16 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="rgb-border-box rounded-2xl bg-[#0d0421]/95 backdrop-blur-xl px-5 py-3.5 shadow-[0_0_35px_rgba(0,245,255,0.4)] flex items-center gap-3">
+            <span class="w-3 h-3 rounded-full bg-rave-lime animate-ping"></span>
+            <span id="raveToastText" class="font-mono text-xs sm:text-sm font-bold text-white">已触发全息声光节点！</span>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         JAVASCRIPT ENGINE: WEB AUDIO + LASER CANVAS + INTERACTIONS
+         ========================================== -->
     <script>
-        // Mobile menu toggle
-        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
-            const navLinks = document.querySelector('.nav-links');
-            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
-            
-            // Adjust for mobile
-            if (window.innerWidth <= 768) {
-                if (navLinks.style.display === 'flex') {
-                    navLinks.style.flexDirection = 'column';
-                    navLinks.style.position = 'absolute';
-                    navLinks.style.top = '80px';
-                    navLinks.style.left = '0';
-                    navLinks.style.width = '100%';
-                    navLinks.style.backgroundColor = 'white';
-                    navLinks.style.padding = '20px';
-                    navLinks.style.boxShadow = '0 10px 20px rgba(0,0,0,0.1)';
-                    
-                    const navItems = document.querySelectorAll('.nav-links li');
-                    navItems.forEach(item => {
-                        item.style.margin = '10px 0';
-                    });
+        // --- 1. WEB AUDIO API SYNTHESIZER ENGINE ---
+        let audioCtx = null;
+        let soundEnabled = true;
+        let isRaveOverdrive = false;
+        let raveLoopInterval = null;
+        let currentBpm = 128;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
                 }
             }
-        });
-        
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                const targetId = this.getAttribute('href');
-                if(targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if(targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                    
-                    // Close mobile menu if open
-                    if(window.innerWidth <= 768) {
-                        document.querySelector('.nav-links').style.display = 'none';
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSynthNote(freq = 440, type = 'sawtooth', duration = 0.22) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.015, now + duration);
+
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(2600, now);
+                filter.frequency.exponentialRampToValueAtTime(400, now + duration);
+
+                gain.gain.setValueAtTime(0.14, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (e) {
+                // Ignore audio context restrictions if not yet interacted
+            }
+        }
+
+        // Synthesize a punchy 808 Bass Drop Kick + Laser Sweep
+        function playBassDropSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const now = audioCtx.currentTime;
+                // Sub Kick
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(36, now + 0.45);
+
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.5);
+
+                // Rave Chord Arpeggio
+                const notes = [523.25, 659.25, 783.99, 1046.5];
+                notes.forEach((n, idx) => {
+                    setTimeout(() => playSynthNote(n, 'sawtooth', 0.25), idx * 75);
+                });
+            } catch (e) {}
+        }
+
+        function toggleSoundEngine() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('audioIcon');
+            if (soundEnabled) {
+                icon.className = 'fas fa-volume-up text-xs text-rave-lime';
+                playSynthNote(659.25, 'triangle', 0.2);
+                showToast('🔊 电音合成器已开启 (Web Audio Active)');
+            } else {
+                icon.className = 'fas fa-volume-mute text-xs text-rave-pink';
+                showToast('🔇 音效已静音 (视觉灯光秀继续)');
+            }
+        }
+
+        // --- 2. RAVE OVERDRIVE MODE (一键蹦迪总开关) ---
+        const arpSequence = [261.63, 329.63, 392.00, 523.25, 392.00, 659.25, 523.25, 783.99];
+        let arpIndex = 0;
+
+        function toggleRaveOverdrive() {
+            isRaveOverdrive = !isRaveOverdrive;
+            const body = document.body;
+            const btnText = document.getElementById('raveModeText');
+            const eqHud = document.getElementById('bottomEqualizerHud');
+
+            if (isRaveOverdrive) {
+                body.classList.add('rave-overdrive');
+                btnText.textContent = '⚡ 退出蹦迪 (OVERDRIVE ON)';
+                eqHud.classList.remove('opacity-25');
+                eqHud.classList.add('opacity-95');
+                updateBpm(150);
+                document.getElementById('bpmSlider').value = 150;
+                playBassDropSound();
+                spawnShockwave(window.innerWidth / 2, window.innerHeight / 2, '#ccff00');
+                showToast('🔥 全屏蹦迪模式已激活！150 BPM 激光全开！');
+
+                // Start Techno Arpeggio Loop
+                if (raveLoopInterval) clearInterval(raveLoopInterval);
+                raveLoopInterval = setInterval(() => {
+                    if (isRaveOverdrive && soundEnabled) {
+                        const note = arpSequence[arpIndex % arpSequence.length];
+                        playSynthNote(note, arpIndex % 2 === 0 ? 'sawtooth' : 'triangle', 0.16);
+                        arpIndex++;
                     }
+                }, 200);
+            } else {
+                body.classList.remove('rave-overdrive');
+                btnText.textContent = '🔥 开启蹦迪模式';
+                eqHud.classList.remove('opacity-95');
+                eqHud.classList.add('opacity-25');
+                updateBpm(128);
+                document.getElementById('bpmSlider').value = 128;
+                if (raveLoopInterval) {
+                    clearInterval(raveLoopInterval);
+                    raveLoopInterval = null;
                 }
+                showToast('✨ 已恢复 128 BPM 标准赛博巡航模式');
+            }
+        }
+
+        function updateBpm(val) {
+            currentBpm = parseInt(val, 10);
+            const beatSec = (60 / currentBpm).toFixed(3);
+            document.documentElement.style.setProperty('--beat-speed', `${beatSec}s`);
+            document.getElementById('deckBpmValue').textContent = `${currentBpm} BPM`;
+            document.getElementById('navBpmDisplay').textContent = `${currentBpm} BPM // 视觉打碟引擎`;
+        }
+
+        // --- 3. HERO NODE DECK & BASS DROP DEPLOYMENT ---
+        function pulseNode(nodeId, message, freq) {
+            playSynthNote(freq, 'sawtooth', 0.25);
+            const card = document.getElementById(`nodeCard${nodeId}`);
+            if (card) {
+                card.classList.add('scale-110');
+                setTimeout(() => card.classList.remove('scale-110'), 220);
+            }
+            const consoleEl = document.getElementById('liveDeckConsole');
+            if (consoleEl) {
+                consoleEl.textContent = message;
+            }
+            showToast(message);
+        }
+
+        function triggerHeroDrop() {
+            playBassDropSound();
+            const badge = document.getElementById('deployStatusBadge');
+            const consoleEl = document.getElementById('liveDeckConsole');
+            badge.textContent = '⚡ DROPPING BASS...';
+            badge.className = 'text-[10px] font-mono text-rave-pink mt-1 animate-ping';
+            consoleEl.textContent = '正在编译全息节点并分发至全球 300+ 边缘机房...';
+
+            spawnShockwave(window.innerWidth * 0.65, window.innerHeight * 0.45, '#ff007f');
+
+            setTimeout(() => {
+                badge.textContent = '★ LIVE ON 300 EDGES';
+                badge.className = 'text-[10px] font-mono text-rave-lime mt-1 font-bold';
+                consoleEl.textContent = '✅ 部署完成！耗时 0.82 秒 // 全球音浪已同步上线！';
+                showToast('🚀 BASS DROP 部署成功！全球 300 节点已上线！');
+            }, 900);
+        }
+
+        // --- 4. INTERACTIVE 8-KEY SYNTH LAUNCHPAD ---
+        function triggerSynthPad(padNum, label, freq, waveType, colorHex) {
+            playSynthNote(freq, waveType, 0.3);
+            const btn = document.getElementById(`pad-${padNum}`);
+            if (btn) {
+                btn.classList.add('pad-active');
+                const rect = btn.getBoundingClientRect();
+                spawnShockwave(rect.left + rect.width / 2, rect.top + rect.height / 2, colorHex);
+                setTimeout(() => btn.classList.remove('pad-active'), 160);
+            }
+            const status = document.getElementById('synthPadStatus');
+            if (status) {
+                status.innerHTML = `<span style="color:${colorHex}">⚡ 触发器 [PAD 0${padNum}]: ${label} (${freq}Hz)</span>`;
+            }
+        }
+
+        function playAutoRaveRiff() {
+            const steps = [
+                { pad: 1, label: 'AUTH_LOGIN // 极速鉴权通过', freq: 261.63, type: 'sawtooth', col: '#ff007f' },
+                { pad: 3, label: 'AI_AGENT // 神经网络推理完成', freq: 392.00, type: 'sawtooth', col: '#ccff00' },
+                { pad: 5, label: 'WEBHOOK_SYNC // 跨平台消息广播', freq: 587.33, type: 'triangle', col: '#a855f7' },
+                { pad: 6, label: 'AUTO_SCALE // 集群扩容至 128 节点', freq: 659.25, type: 'sawtooth', col: '#00f5ff' },
+                { pad: 8, label: 'PROD_DEPLOY // 全球 300 节点同步高潮！', freq: 1046.50, type: 'sawtooth', col: '#ccff00' }
+            ];
+            steps.forEach((s, i) => {
+                setTimeout(() => {
+                    triggerSynthPad(s.pad, s.label, s.freq, s.type, s.col);
+                }, i * 160);
             });
+        }
+
+        // Keyboard 1-8 listener for Synth Pads
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const keyMap = {
+                '1': () => triggerSynthPad(1, 'AUTH_LOGIN // 极速鉴权通过', 261.63, 'sawtooth', '#ff007f'),
+                '2': () => triggerSynthPad(2, 'DB_QUERY // 0.3ms 索引命中', 329.63, 'triangle', '#00f5ff'),
+                '3': () => triggerSynthPad(3, 'AI_AGENT // 神经网络推理完成', 392.00, 'sawtooth', '#ccff00'),
+                '4': () => triggerSynthPad(4, 'STRIPE_PAY // 订单支付秒级到账', 523.25, 'sine', '#ff5500'),
+                '5': () => triggerSynthPad(5, 'WEBHOOK_SYNC // 跨平台消息广播', 587.33, 'triangle', '#a855f7'),
+                '6': () => triggerSynthPad(6, 'AUTO_SCALE // 集群扩容至 128 节点', 659.25, 'sawtooth', '#00f5ff'),
+                '7': () => triggerSynthPad(7, 'WAF_SHIELD // 拦截 99,400 次恶意探测', 783.99, 'square', '#ff007f'),
+                '8': () => triggerSynthPad(8, 'PROD_DEPLOY // 全球 300 节点同步高潮！', 1046.50, 'sawtooth', '#ccff00')
+            };
+            if (keyMap[e.key]) {
+                keyMap[e.key]();
+            }
         });
-        
-        // Simple testimonial slider
-        const testimonials = [
+
+        // --- 5. VIP TESTIMONIALS SWITCHER ---
+        const vipData = [
             {
-                text: "CodeFlow transformed how we deliver solutions to our business units. What used to take 6 months now takes 3 weeks. Our development team can focus on complex problems while business teams build their own solutions.",
-                name: "Sarah Chen",
-                position: "CTO, TechGrowth Inc.",
-                initials: "SC"
+                initials: 'SC',
+                name: 'Sarah Chen 陈莎拉',
+                role: 'TechGrowth 集团首席技术官 CTO',
+                quote: '“CodeFlow 彻底颠覆了我们向业务部门交付系统的方式！以前需要 6 个月憋大招的项目，现在 2 周就能带着炫酷的动效直接上线。研发团队终于能摆脱枯燥的增删改查，专注攻克核心算法！”'
             },
             {
-                text: "We reduced our app development time by 80% using CodeFlow. The visual interface made it easy for our analysts to build data dashboards without waiting for IT resources.",
-                name: "Marcus Johnson",
-                position: "Director of Operations, DataCorp",
-                initials: "MJ"
+                initials: 'MJ',
+                name: 'Marcus Johnson 马库斯',
+                role: 'DataPulse 全球数据运营总监',
+                quote: '“我们使用 CodeFlow 将全公司的实时数据看板研发时间砍掉了 85%！全息节点连线非常直观，连不懂后端的业务分析师都能自己拖拽出高并发的数据大屏，简直像打碟一样丝滑。”'
             },
             {
-                text: "As a non-technical founder, CodeFlow allowed me to build our MVP in just 2 months. I could test ideas quickly and iterate based on user feedback without deep coding knowledge.",
-                name: "Lisa Wang",
-                position: "Founder, StartupLabs",
-                initials: "LW"
+                initials: 'LZ',
+                name: '林哲 Lin Zhe',
+                role: 'NeonLabs AI 独角兽创始人',
+                quote: '“作为一名追求极致视觉体验的创业者，CodeFlow 让我一个人在周末两天内就搭出了估值千万美金的 MVP 产品。一键编译 Web 和 iOS 双端，投资人看到界面的第一眼就被彻底征服了！”'
             }
         ];
-        
-        let currentTestimonial = 0;
-        const testimonialElement = document.querySelector('.testimonial');
-        
-        function rotateTestimonial() {
-            currentTestimonial = (currentTestimonial + 1) % testimonials.length;
-            updateTestimonial();
+
+        function selectVipTestimonial(idx) {
+            playSynthNote(440 + idx * 110, 'triangle', 0.18);
+            const item = vipData[idx];
+            document.getElementById('vipAvatar').textContent = item.initials;
+            document.getElementById('vipName').textContent = item.name;
+            document.getElementById('vipRole').textContent = item.role;
+            document.getElementById('vipQuote').textContent = item.quote;
+
+            [0, 1, 2].forEach(i => {
+                const tab = document.getElementById(`vipTab${i}`);
+                if (i === idx) {
+                    tab.className = 'px-4 py-2 rounded-xl font-mono text-xs font-bold bg-rave-pink text-white shadow-[0_0_15px_#ff007f] transition-all cursor-pointer';
+                } else {
+                    tab.className = 'px-4 py-2 rounded-xl font-mono text-xs font-bold bg-white/5 text-slate-400 hover:text-white transition-all cursor-pointer';
+                }
+            });
         }
-        
-        function updateTestimonial() {
-            const testimonial = testimonials[currentTestimonial];
-            testimonialElement.innerHTML = `
-                <div class="testimonial-text">"${testimonial.text}"</div>
-                <div class="testimonial-author">
-                    <div class="author-avatar">${testimonial.initials}</div>
-                    <div class="author-info">
-                        <h4>${testimonial.name}</h4>
-                        <p>${testimonial.position}</p>
-                    </div>
-                </div>
-            `;
+
+        // --- 6. PRICING BILLING CYCLE SWITCH ---
+        function setBillingCycle(mode) {
+            playSynthNote(mode === 'yearly' ? 659.25 : 523.25, 'sine', 0.18);
+            const mBtn = document.getElementById('billMonthlyBtn');
+            const yBtn = document.getElementById('billYearlyBtn');
+            const pStarter = document.getElementById('priceStarter');
+            const pPro = document.getElementById('pricePro');
+
+            if (mode === 'yearly') {
+                yBtn.className = 'px-5 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold bg-rave-pink text-white shadow-[0_0_20px_rgba(255,0,127,0.5)] transition-all flex items-center gap-2 cursor-pointer';
+                mBtn.className = 'px-5 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all cursor-pointer';
+                pStarter.textContent = '$20';
+                pPro.textContent = '$62';
+                showToast('🎉 已切换至年付包场：立省 30% + 赠送无限激光算力！');
+            } else {
+                mBtn.className = 'px-5 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold bg-rave-pink text-white shadow-[0_0_20px_rgba(255,0,127,0.5)] transition-all cursor-pointer';
+                yBtn.className = 'px-5 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold text-slate-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer';
+                pStarter.textContent = '$29';
+                pPro.textContent = '$89';
+            }
         }
-        
-        // Auto-rotate testimonials every 5 seconds
-        setInterval(rotateTestimonial, 5000);
-        
-        // CTA button interactions
-        document.querySelectorAll('.cta-button').forEach(button => {
-            button.addEventListener('click', function() {
-                alert('Thank you for your interest in CodeFlow! You would be redirected to the signup page in a real implementation.');
+
+        // --- 7. CUSTOM HOLOGRAPHIC MODAL & TOAST SYSTEM ---
+        function openRaveModal(title, desc) {
+            playBassDropSound();
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDesc').textContent = desc;
+            const modal = document.getElementById('raveModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeRaveModal() {
+            const modal = document.getElementById('raveModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function submitRaveModal(e) {
+            e.preventDefault();
+            const email = document.getElementById('modalEmailInput').value;
+            closeRaveModal();
+            playBassDropSound();
+            spawnShockwave(window.innerWidth / 2, window.innerHeight / 2, '#00f5ff');
+            showToast(`🚀 VIP 通行证已发送至 ${email}！准备好开始打碟开发！`);
+            document.getElementById('modalEmailInput').value = '';
+        }
+
+        let toastTimer = null;
+        function showToast(text) {
+            const toast = document.getElementById('raveToast');
+            document.getElementById('raveToastText').textContent = text;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3400);
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // --- 8. MOUSE SPOTLIGHT TRACKING FOR HOLOGRAPHIC CARDS ---
+        document.addEventListener('mousemove', (e) => {
+            const glow = document.getElementById('cursorGlow');
+            if (glow) {
+                glow.style.left = `${e.clientX}px`;
+                glow.style.top = `${e.clientY}px`;
+            }
+
+            document.querySelectorAll('.holo-card').forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--card-mouse-x', `${x}px`);
+                card.style.setProperty('--card-mouse-y', `${y}px`);
             });
         });
-        
-        // Pricing card interactions
-        document.querySelectorAll('.pricing-card button').forEach(button => {
-            button.addEventListener('click', function() {
-                const planName = this.closest('.pricing-card').querySelector('.plan-name').textContent;
-                alert(`You selected the ${planName} plan. In a real implementation, you would be redirected to the checkout process.`);
+
+        // --- 9. GENERATE BOTTOM 36-BAND RGB SPECTRUM HUD ---
+        function initBottomSpectrum() {
+            const container = document.getElementById('bottomEqualizerHud');
+            const colors = ['#ff007f', '#00f5ff', '#ccff00', '#8a2be2', '#ff5500'];
+            let html = '';
+            for (let i = 0; i < 36; i++) {
+                const col = colors[i % colors.length];
+                const delay = (Math.random() * 0.5).toFixed(2);
+                html += `<div class="flex-1 h-full eq-bar rounded-t-sm" style="background:${col}; box-shadow: 0 0 12px ${col}; animation-delay:${delay}s;"></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        // --- 10. HTML5 CANVAS LASER SHOW & PARTICLE RAVE ENGINE ---
+        const canvas = document.getElementById('raveCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let shockwaves = [];
+        let laserAngle = 0;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const neonPalette = ['#ff007f', '#00f5ff', '#ccff00', '#8a2be2', '#ff5500'];
+
+        function initParticles() {
+            particles = [];
+            const count = window.innerWidth < 768 ? 35 : 70;
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 2.5 + 1,
+                    vx: (Math.random() - 0.5) * 0.9,
+                    vy: -Math.random() * 1.2 - 0.3,
+                    color: neonPalette[Math.floor(Math.random() * neonPalette.length)],
+                    alpha: Math.random() * 0.7 + 0.2
+                });
+            }
+        }
+
+        function spawnShockwave(x, y, color) {
+            shockwaves.push({
+                x,
+                y,
+                radius: 10,
+                maxRadius: 320,
+                color: color || '#00f5ff',
+                alpha: 0.9
             });
-        });
+        }
+
+        function animateRaveCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const speedMultiplier = isRaveOverdrive ? 3.2 : 1;
+            laserAngle += 0.012 * speedMultiplier;
+
+            // Draw Top Stage Club Laser Beams
+            const laserSources = [
+                { x: canvas.width * 0.2, color: 'rgba(255, 0, 127, 0.16)' },
+                { x: canvas.width * 0.5, color: 'rgba(0, 245, 255, 0.16)' },
+                { x: canvas.width * 0.8, color: 'rgba(204, 255, 0, 0.15)' }
+            ];
+
+            laserSources.forEach((src, idx) => {
+                const beamCount = isRaveOverdrive ? 4 : 2;
+                for (let b = 0; b < beamCount; b++) {
+                    const angle = Math.sin(laserAngle + idx * 1.3 + b * 0.8) * 0.65;
+                    const targetX = src.x + Math.tan(angle) * canvas.height;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(src.x, 0);
+                    ctx.lineTo(targetX - 45, canvas.height);
+                    ctx.lineTo(targetX + 45, canvas.height);
+                    ctx.closePath();
+                    const grad = ctx.createLinearGradient(src.x, 0, targetX, canvas.height);
+                    grad.addColorStop(0, isRaveOverdrive ? src.color.replace('0.16', '0.34') : src.color);
+                    grad.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+                    ctx.restore();
+                }
+            });
+
+            // Draw Floating Neon Particles
+            particles.forEach(p => {
+                p.x += p.vx * speedMultiplier;
+                p.y += p.vy * speedMultiplier;
+
+                if (p.y < 0) {
+                    p.y = canvas.height;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = p.color;
+                ctx.fill();
+            });
+
+            // Draw Expanding Neon Shockwaves
+            for (let i = shockwaves.length - 1; i >= 0; i--) {
+                const sw = shockwaves[i];
+                sw.radius += 9;
+                sw.alpha -= 0.025;
+                if (sw.alpha <= 0) {
+                    shockwaves.splice(i, 1);
+                    continue;
+                }
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = sw.color;
+                ctx.lineWidth = 3;
+                ctx.globalAlpha = Math.max(0, sw.alpha);
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = sw.color;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            requestAnimationFrame(animateRaveCanvas);
+        }
+
+        window.onload = function () {
+            initBottomSpectrum();
+            initParticles();
+            animateRaveCanvas();
+        };
     </script>
 </body>
 </html>
