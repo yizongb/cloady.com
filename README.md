@@ -19,7 +19,7 @@ Telegram交流反馈群组：https://t.me/eooceu
 
 ## 说明 （部署前请仔细阅读）
 
-* 本项目是针对node环境的paas平台和游戏玩具而生，采用Argo隧道部署节点，集成哪吒探针v0或v1可选。
+* 本项目是针对node环境的paas平台和游戏玩具而生，采用Argo隧道部署节点，可选哪吒探针v0/v1或Lite探针。
 * node玩具平台只需上传index.js和package.json即可，paas平台需要docker部署的才上传Dockerfile。
 * 不填写ARGO_DOMAIN和ARGO_AUTH两个变量即启用临时隧道，反之则使用固定隧道。
 * 哪吒v0/v1可选,当哪吒端口为{443,8443,2096,2087,2083,2053}其中之一时，自动开启tls。
@@ -37,6 +37,10 @@ Telegram交流反馈群组：https://t.me/eooceu
 | NEZHA_SERVER | 否 | - | 哪吒面板域名 |
 | NEZHA_PORT | 否 | - | 哪吒端口 |
 | NEZHA_KEY | 否 | - | 哪吒密钥 |
+| PROBE_TYPE | 否 | nezha | 探针类型：nezha、lite、none；默认保持原有哪吒行为 |
+| LITE_SERVER | 选择lite时必填 | - | Lite面板完整HTTP(S)地址，例如 https://lite.example.com |
+| LITE_TOKEN | 选择lite时必填 | - | Lite后台对应节点的Token，不是管理员密码 |
+| LITE_AGENT_VERSION | 否 | latest | 启动时下载的Lite-agent发布标签；不关闭运行期间自动更新 |
 | ARGO_DOMAIN | 否 | - | Argo固定隧道域名,留空使用临时隧道 |
 | ARGO_AUTH | 否 | - | Argo固定隧道密钥 |
 | CFIP | 否 | www.visa.com.tw | 节点优选域名或IP |
@@ -47,6 +51,25 @@ Telegram交流反馈群组：https://t.me/eooceu
 | CHAT_ID | 否 |   | 推送节点的chat id,需要和bot token同时填写生效 |
 | BOT_TOKEN | 否 |  | 推送节点的bot token |
 | SHOW_LOG | 否 | true | 是否显示日志,no/false/disable屏蔽,true/yes显示|
+
+## Lite探针与Cloady部署
+
+在Lite后台添加节点，从该节点的“节点配置 → 部署指令”取得面板地址和Token。在Cloady的环境变量中填写：
+
+```env
+PROBE_TYPE=lite
+LITE_SERVER=https://lite.example.com
+LITE_TOKEN=替换为该节点的Token
+LITE_AGENT_VERSION=latest
+```
+
+默认`latest`会在每次容器启动时下载当时的正式版，运行期间也始终开启Agent自动更新。若指定版本标签，只决定启动时下载的版本，不锁定运行版本。自动更新完成后，脚本会重新启动更新后的Agent并保留两个常开参数。每个独立实例应使用自己的节点Token。
+
+选择`lite`时忽略所有`NEZHA_*`变量。选择`nezha`（或不设置`PROBE_TYPE`）时沿用原来的哪吒v0/v1配置；选择`none`关闭所有探针。Lite配置缺失或下载失败会输出错误，但不会阻塞隧道启动。
+
+将改动合并到GitHub的`main`后，现有Actions构建并发布`ghcr.io/yizongb/nodejs:latest`（amd64/arm64）。Cloady使用该镜像，设置上述环境变量及原有隧道变量，然后重新拉取镜像并部署。私有镜像需配置拉取凭据，或将GitHub Packages中的镜像设为公开。节点Token只填在Cloady环境变量中，不要提交到仓库。
+
+Lite-agent在容器启动时从GitHub Releases下载，需要容器能够访问GitHub及Lite面板。它直接作为子进程运行，不需要systemd；状态保存在`FILE_PATH/lite`，不受90秒清理任务影响。默认校验证书，并固定传入`--disable-auto-update=false`和`--enable-remote-control=true`，始终开启Agent自动更新与远程控制。要使用远程终端、文件管理和远程执行，还需要在Lite面板的“系统设置 → 通用 → 允许远程管理”中开启面板端开关。日志中的`process started`仅表示进程已启动，是否成功上报以Lite面板在线状态为准。容器环境统计以容器可见资源为准。
 
 ## 🌐 订阅地址
 

@@ -7,7 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require('crypto');
 const { promisify } = require('util');
-const { exec: execCommand, execSync } = require('child_process');
+const { exec: execCommand, execSync, spawn } = require('child_process');
 const exec = promisify(execCommand);
 const UPLOAD_URL = process.env.UPLOAD_URL || '';      // 节点或订阅自动上传地址,需填写部署Merge-sub项目后的首页地址,例如：https://merge.xxx.com
 const PROJECT_URL = process.env.PROJECT_URL || '';    // 需要上传订阅或保活时需填写项目分配的url,例如：https://google.com
@@ -19,6 +19,10 @@ const UUID = process.env.UUID || '9afd1229-b893-40c1-84dd-51e7ce204913'; // 使�
 const NEZHA_SERVER = process.env.NEZHA_SERVER || '';        // 哪吒v1填写形式: nz.abc.com:8008  哪吒v0填写形式：nz.abc.com
 const NEZHA_PORT = process.env.NEZHA_PORT || '';            // 使用哪吒v1请留空，哪吒v0需填写
 const NEZHA_KEY = process.env.NEZHA_KEY || '';              // 哪吒v1的NZ_CLIENT_SECRET或哪吒v0的agent密钥
+const PROBE_TYPE = (process.env.PROBE_TYPE || 'nezha').trim().toLowerCase(); // nezha / lite / none
+const LITE_SERVER = (process.env.LITE_SERVER || '').trim(); // Lite面板完整地址，例如 https://lite.example.com
+const LITE_TOKEN = process.env.LITE_TOKEN || '';           // Lite后台对应节点的Token
+const LITE_AGENT_VERSION = (process.env.LITE_AGENT_VERSION || 'latest').trim(); // 启动下载版本；运行期间自动更新始终开启
 const ARGO_DOMAIN = process.env.ARGO_DOMAIN || '';          // 固定隧道域名,留空即启用临时隧道
 const ARGO_AUTH = process.env.ARGO_AUTH || '';              // 固定隧道密钥json或token,留空即启用临时隧道,json获取地址：https://json.zone.id
 const ARGO_PORT = process.env.ARGO_PORT || 8001;            // 固定隧道端口,使用token需在cloudflare后台设置和这里一致
@@ -467,7 +471,7 @@ async function downloadFilesAndRun() {
   authorizeFiles(filesToAuthorize);
 
   // 运行ne-zha
-  if (NEZHA_SERVER && NEZHA_KEY) {
+  if (PROBE_TYPE === 'nezha' && NEZHA_SERVER && NEZHA_KEY) {
     if (!NEZHA_PORT) {
       const port = NEZHA_SERVER.includes(':') ? NEZHA_SERVER.split(':').pop() : '';
       const tlsPorts = new Set(['443', '8443', '2096', '2087', '2083', '2053']);
@@ -519,7 +523,7 @@ uuid: ${UUID}`;
       }
     }
   } else {
-    console.log('NEZHA variable is empty,skip running');
+    console.log('Nezha is not selected or its configuration is empty, skip running');
   }
 
   // 运行xr-ay
@@ -564,7 +568,7 @@ function getFilesForArchitecture(architecture) {
     { fileName: botPath, fileUrls: [`${baseUrl}/bot`, `${backupUrl}/bot`] }
   ];
 
-  if (NEZHA_SERVER && NEZHA_KEY) {
+  if (PROBE_TYPE === 'nezha' && NEZHA_SERVER && NEZHA_KEY) {
     if (NEZHA_PORT) {
       baseFiles.unshift({
         fileName: npmPath,
@@ -579,6 +583,73 @@ function getFilesForArchitecture(architecture) {
   }
 
   return baseFiles;
+}
+
+// Lite独立启动：探针下载或配置失败不阻塞隧道服务，不依赖root/systemd。
+function getLiteDownloadUrl(platform = process.platform, arch = os.arch()) {
+  const architectures = { x64: 'amd64', arm64: 'arm64', arm: 'arm', ia32: '386', loong64: 'loong64' };
+  if (platform !== 'linux' || !architectures[arch]) {
+    throw new Error('Lite integration requires a supported Linux architecture');
+  }
+  if (!/^(latest|v?\d+\.\d+\.\d+(?:\.\d+)?)$/.test(LITE_AGENT_VERSION)) {
+    throw new Error('Invalid LITE_AGENT_VERSION: use a release tag or latest');
+  }
+  const release = LITE_AGENT_VERSION === 'latest' ? 'latest/download' : `download/${LITE_AGENT_VERSION}`;
+  return `https://github.com/nuomiiiii/Lite-agent/releases/${release}/Lite-agent-linux-${architectures[arch]}`;
+}
+
+async function startLiteAgent() {
+  if (PROBE_TYPE !== 'lite') return;
+  try {
+    if (!LITE_SERVER || !LITE_TOKEN.trim()) {
+      throw new Error('LITE_SERVER and LITE_TOKEN are required');
+    }
+    let server;
+    try { server = new URL(LITE_SERVER); } catch {
+      throw new Error('LITE_SERVER must be a complete http:// or https:// URL');
+    }
+    if (!['http:', 'https:'].includes(server.protocol) || server.username || server.password || server.search || server.hash) {
+      throw new Error('LITE_SERVER must be an HTTP(S) URL without credentials, query or fragment');
+    }
+    const url = getLiteDownloadUrl();
+    // 独立目录保留Agent状态，不受现有90秒清理任务影响。
+    const directory = path.resolve(FILE_PATH, 'lite');
+    fs.mkdirSync(directory, { recursive: true });
+    const binary = path.join(directory, 'Lite-agent');
+    const config = path.join(directory, 'config.json');
+    if (!fs.existsSync(config)) fs.writeFileSync(config, '{}', { mode: 0o600 });
+    await new Promise((resolve, reject) => {
+      downloadFile(binary, url, error => error ? reject(new Error('Lite-agent download failed')) : resolve());
+    });
+    fs.chmodSync(binary, 0o755);
+    const launch = () => {
+      const child = spawn(binary, [
+        '--endpoint', LITE_SERVER, '--config', config,
+        '--disable-auto-update=false', '--enable-remote-control=true'
+      ], {
+        cwd: directory,
+        detached: true,
+        stdio: 'ignore',
+        // Token通过环境变量传入，不拼接shell命令，也不写入日志。
+        env: { ...process.env, AGENT_TOKEN: LITE_TOKEN, LITE_AGENT_SKIP_RELOCATE: '1' }
+      });
+      child.once('error', () => console.error('Lite-agent could not start'));
+      child.once('exit', (code, signal) => {
+        // Lite-agent自动更新完成后以42退出；直接启动已更新文件，不重新下载旧版本。
+        if (code === 42 && !signal) {
+          console.log('Lite-agent updated; restarting');
+          setTimeout(launch, 1000).unref();
+        } else {
+          console.error(`Lite-agent exited (code: ${code}, signal: ${signal})`);
+        }
+      });
+      child.once('spawn', () => console.log('Lite-agent process started; check the Lite panel for online status'));
+      child.unref();
+    };
+    launch();
+  } catch (error) {
+    console.error(`Lite-agent skipped: ${error.message}`);
+  }
 }
 
 // 获取固定隧道json
@@ -908,6 +979,10 @@ async function AddVisitTask() {
 async function startserver() {
   try {
     cleanupOldFiles();
+    if (!['nezha', 'lite', 'none'].includes(PROBE_TYPE)) {
+      console.error('Unknown PROBE_TYPE; use nezha, lite or none. No probe will start.');
+    }
+    void startLiteAgent();
     argoType();
     deleteNodes();
 
