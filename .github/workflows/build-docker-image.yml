@@ -33,6 +33,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check probe integration
+        timeout-minutes: 2
         run: |
           node --check index.js
           npm test
