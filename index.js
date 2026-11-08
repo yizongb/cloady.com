@@ -36,7 +36,7 @@ const CHAT_ID = process.env.CHAT_ID || '';                  // Telegram chat_id 
 const BOT_TOKEN = process.env.BOT_TOKEN || '';              // Telegram bot_token 两个变量不全不推送节点到TG 
 const SHOW_LOG = !['false', 'disable', 'no'].includes((process.env.SHOW_LOG || 'true').toLowerCase()); // 是否显示日志输出，true/yes显示，false/disable/no屏蔽，默认显示
 
-//https://eooce.dev/
+// https://eooce.dev/
 // 控制日志输出
 if (!SHOW_LOG) {
   console.log = () => {};
